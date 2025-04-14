@@ -80,7 +80,29 @@ Pour toute question ou suggestion, n'hésitez pas à ouvrir une issue sur GitHub
 - Organisation des projets par client/bâtiment
 - Système de recherche et filtrage des projets
 
-### Priorité 2 - Analyse Financière
+### Priorité 2 - Expérience Utilisateur
+- Mode sombre/clair pour une meilleure accessibilité
+- Tableau de bord personnalisable avec statistiques clés
+- Système avancé de filtres et de recherche
+- Visualisations graphiques interactives des résultats
+- Mode présentation client avec exports personnalisés
+- Interface adaptative selon le profil utilisateur
+- Notifications et alertes personnalisables
+- Workflows personnalisés par type de projet
+
+### Priorité 3 - Conformité et Normes
+- Intégration des dernières normes énergétiques
+- Mises à jour automatiques des réglementations
+- Génération de rapports de conformité
+- Suivi des évolutions réglementaires
+- Validation automatique des critères normatifs
+- Alertes sur les changements réglementaires
+- Base de données des normes par région/pays
+- Assistant de mise en conformité
+
+### Autres Améliorations Prévues
+
+#### Analyse Financière
 - Calcul du taux de retour sur investissement (ROI)
 - Estimation des coûts des améliorations
 - Analyse comparative des différentes solutions
@@ -88,15 +110,13 @@ Pour toute question ou suggestion, n'hésitez pas à ouvrir une issue sur GitHub
 - Export des analyses financières
 - Intégration des coûts énergétiques locaux
 
-### Priorité 3 - Prescription Automatique
+#### Prescription Automatique
 - Système de recommandation d'équipements techniques
 - Base de données des équipements disponibles
 - Matching automatique entre besoins et solutions
 - Génération de cahiers des charges
 - Comparaison des solutions techniques
 - Mise à jour automatique des catalogues produits
-
-### Autres Améliorations Prévues
 
 #### Fonctionnalités Techniques
 - Export des évaluations en PDF/Excel
@@ -105,21 +125,8 @@ Pour toute question ou suggestion, n'hésitez pas à ouvrir une issue sur GitHub
 - Comparaison entre différents bâtiments
 - API REST pour l'intégration avec d'autres systèmes
 
-#### Expérience Utilisateur
-- Mode sombre/clair
-- Tableau de bord avec statistiques
-- Filtres et recherche avancée
-- Visualisations graphiques des résultats
-- Mode présentation pour les clients
-
 #### Gestion des Données
 - Multi-utilisateurs avec différents rôles
 - Sauvegarde automatique dans le cloud
 - Import/Export des données
-- Base de données de références
-
-#### Conformité et Normes
-- Intégration des dernières normes énergétiques
-- Mises à jour automatiques des réglementations
-- Génération de rapports de conformité
-- Suivi des évolutions réglementaires 
+- Base de données de références 
