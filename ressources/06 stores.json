@@ -1,0 +1,38 @@
+{
+  "6_stores": {
+    "description": "Systèmes de protection solaire",
+    "sous_categories": {
+      "6.1_commande_stores": {
+        "description": "Commande de stores",
+        "classes": {
+          "classe_D": {
+            "fonctionnement_manuel": {
+              "description": "Fonctionnement manuel",
+              "impact": "Utilisé le plus souvent uniquement pour un obscurcissement manuel, l'économie d'énergie ne dépend que du comportement de l'utilisateur. Les interventions manuelles visent généralement à se protéger de l'éblouissement. Les économies d'énergie sont fortement dépendantes du comportement des utilisateurs.",
+              "images": ["image_1"]
+            },
+            "fonctionnement_motorise_manuel": {
+              "description": "Fonctionnement motorisé avec commande manuelle",
+              "impact": "Utilisé le plus souvent uniquement pour faciliter un obscurcissement manuel (assisté par moteur électrique), l'économie d'énergie ne dépend que du comportement de l'utilisateur. L'assistance d'une motorisation ne vise qu'à soulager l'effort manuel et n'est principalement utilisée que pour éviter un éblouissement. Les économies d'énergie sont fortement dépendantes du comportement des utilisateurs.",
+              "images": ["image_1"]
+            }
+          },
+          "classe_C": {
+            "fonctionnement_motorise_automatique": {
+              "description": "Fonctionnement motorisé avec commande automatique",
+              "impact": "Atténuation commandée automatiquement pour réduire l'énergie destinée à un refroidissement. L'assistance motorisée est nécessaire à la commande automatique. Les fonctions de commande automatique viennent principalement en soutien de la protection solaire pour réduire l'apport thermique et donc économiser de l'énergie de refroidissement. La commande manuelle par l'utilisateur doit être possible à tout moment, pour se protéger contre l'éblouissement indépendamment de la commande automatique des protections solaires.",
+              "images": ["image_1"]
+            }
+          },
+          "classe_A": {
+            "commande_combinee": {
+              "description": "Commande combinée de l'éclairage, des stores et du système de chauffage, de ventilation et de climatisation (CVC)",
+              "impact": "Pour optimiser l'utilisation de l'énergie pour le système de chauffage, de ventilation et de climatisation (CVC), les stores et l'éclairage pour les pièces occupées et inoccupées. Cette variante d'exécution tient compte de toutes les raisons pour satisfaire les besoins de l'occupant et optimiser l'utilisation de l'énergie (pondération en fonction des priorités, tant pour les espaces occupés que non occupés).",
+              "images": ["image_1"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+Classification Énergétique des Bâtiments
+│
+├── 1_chauffage - Systèmes et méthodes de chauffage du bâtiment
+│   ├── 1.1_regulation_emission - Régulation de l'émission de chaleur
+│   ├── 1.2_regulation_emission_thermo_actif - Régulation de l'émission pour système thermo-actif (mode de chauffage)
+│   ├── 1.3_regulation_temperature_reseau - Régulation de la température du réseau de distribution
+│   ├── 1.4_regulation_pompes_distribution - Régulation des pompes de distribution du réseau
+│   ├── 1.4a_equilibrage_hydronique - Équilibrage hydronique du système de distribution de chaleur
+│   ├── 1.5_regulation_intermittente - Régulation intermittente de l'émission et/ou de la distribution
+│   ├── 1.6_regulation_generateurs_chaleur - Régulation des générateurs de chaleur pour la combustion
+│   ├── 1.7_pompe_chaleur_regulation - Pompe à chaleur pour la régulation des générateurs
+│   ├── 1.8_regulation_generateurs_chaleur_unite_exterieure - Régulation des générateurs (unité extérieure)
+│   ├── 1.9_priorite_generateurs_chaleur - Ordre de priorité des différents générateurs de chaleur
+│   └── 1.10_stockage_energie_thermique - Régulation du stockage de l'énergie thermique
+│
+├── 2_ecs - Eau Chaude Sanitaire
+│   ├── 2.1_regulation_stockage_chauffage_electrique - Régulation du stockage avec chauffage électrique direct ou pompe à chaleur
+│   ├── 2.2_regulation_stockage_generateur - Régulation du stockage en utilisant un générateur d'eau chaude
+│   ├── 2.3_regulation_stockage_energie_solaire - Régulation du stockage avec collecteur d'énergie solaire et génération de chaleur supplémentaire
+│   └── 2.4_commande_pompe_circulation - Commande de la pompe de circulation d'eau chaude sanitaire
+│
+├── 3_refroidissement - Systèmes de refroidissement
+│   ├── 3.1_regulation_emission - Régulation de l'émission
+│   ├── 3.2_regulation_emission_thermo_actif - Régulation du système thermo-actif (refroidissement)
+│   ├── 3.3_regulation_temperature_reseau - Régulation de la température de l'eau réfrigérée
+│   ├── 3.4_regulation_pompes_distribution - Commande des pompes dans les réseaux hydrauliques
+│   ├── 3.4a_equilibrage_hydronique - Équilibrage hydronique du système de distribution de froid
+│   ├── 3.5_regulation_intermittente - Régulation intermittente de l'émission/distribution
+│   ├── 3.6_asservissement_chauffage_refroidissement - Asservissement entre régulations
+│   ├── 3.7_regulation_generateurs_froid - Régulation de générateurs de froid
+│   ├── 3.8_priorite_generateurs_froid - Ordre de priorité des générateurs de froid
+│   └── 3.9_stockage_energie_thermique - Régulation du stockage de l'énergie thermique
+│
+├── 4_ventilation_climatisation - Systèmes de ventilation et climatisation
+│   ├── 4.1_regulation_alimentation_air - Régulation de l'alimentation en air au niveau de la pièce
+│   ├── 4.2_regulation_temperature_air - Régulation de la température par ventilation
+│   ├── 4.3_coordination_regulation - Coordination de la régulation via ventilation/système statique
+│   ├── 4.4_regulation_debit_air_exterieur - Régulation du débit d'air extérieur
+│   ├── 4.5_regulation_centrale_traitement_air - Régulation du débit/pression d'air (centrale)
+│   ├── 4.6_regulation_recuperation_chaleur_gel - Protection contre le gel
+│   ├── 4.7_commande_recuperation_chaleur_surchauffe - Prévention des surchauffes
+│   ├── 4.8_refroidissement_mecanique_naturel - Refroidissement mécanique naturel
+│   ├── 4.9_regulation_temperature_air_centrale - Régulation de la température (unité de traitement)
+│   └── 4.10_regulation_humidite - Régulation de l'humidité
+│
+├── 5_eclairage - Systèmes d'éclairage
+│   ├── 5.1_commande_occupation - Commande basée sur l'occupation
+│   └── 5.2_regulation_intensite_lumineuse - Régulation de l'intensité lumineuse/de la lumière naturelle
+│
+├── 6_stores - Systèmes de protection solaire
+│   └── 6.1_commande_stores - Commande de stores
+│
+└── 7_gtb - Gestion Technique du Bâtiment
+    ├── 7.1_gestion_points_consigne - Gestion des points de consigne
+    ├── 7.2_gestion_temps_fonctionnement - Gestion des temps de fonctionnement
+    ├── 7.3_detection_defauts - Détection des défauts des systèmes et aide au diagnostic
+    ├── 7.4_compte_rendu_informations - Compte-rendu des informations concernant la consommation énergétique et les conditions intérieures
+    ├── 7.5_production_energie_locale - Production d'énergie locale et énergies renouvelables
+    ├── 7.6_recuperation_transfert_chaleur - Récupération de chaleur et transfert de chaleur
+    └── 7.7_integration_reseau_intelligent - Intégration dans un réseau intelligent
