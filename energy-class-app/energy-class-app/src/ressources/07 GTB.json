@@ -1,0 +1,238 @@
+{
+  "7_gtb": {
+    "description": "Gestion Technique du Bâtiment",
+    "sous_categories": {
+      "7.1_gestion_points_consigne": {
+        "description": "Gestion des points de consigne",
+        "classes": {
+          "classe_D": {
+            "consignes_fixes": {
+              "description": "Consignes fixes programmées manuellement",
+              "impact": "Les points de consigne sont fixés manuellement par l'opérateur du bâtiment, sans adaptation automatique aux besoins ou aux conditions environnementales, entraînant des dépenses énergétiques non optimisées.",
+              "images": []
+            }
+          },
+          "classe_C": {
+            "adaptation_manuelle_saisonniere": {
+              "description": "Adaptation manuelle saisonnière des consignes",
+              "impact": "Les points de consigne sont ajustés manuellement selon les saisons, permettant une meilleure adaptation aux conditions climatiques générales mais sans prise en compte des variations journalières ou des besoins spécifiques des occupants.",
+              "images": []
+            }
+          },
+          "classe_B": {
+            "adaptation_automatique_calendrier": {
+              "description": "Adaptation automatique selon un calendrier prédéfini",
+              "impact": "Les points de consigne sont ajustés automatiquement selon un calendrier prédéfini, permettant une meilleure gestion énergétique basée sur l'occupation prévue et les conditions saisonnières.",
+              "images": []
+            }
+          },
+          "classe_A": {
+            "adaptation_dynamique_intelligente": {
+              "description": "Adaptation dynamique et intelligente des consignes",
+              "impact": "Les points de consigne sont ajustés automatiquement en fonction des conditions réelles (intérieures et extérieures), de l'occupation, et des besoins spécifiques, optimisant à la fois le confort et la consommation énergétique.",
+              "images": []
+            }
+          }
+        }
+      },
+      "7.2_gestion_temps_fonctionnement": {
+        "description": "Gestion des temps de fonctionnement",
+        "classes": {
+          "classe_D": {
+            "fonctionnement_continu": {
+              "description": "Fonctionnement continu ou manuel",
+              "impact": "Les systèmes techniques fonctionnent en continu ou sont arrêtés/démarrés manuellement, sans prise en compte des périodes d'inoccupation, entraînant un gaspillage d'énergie significatif.",
+              "images": []
+            }
+          },
+          "classe_C": {
+            "programmation_horaire_simple": {
+              "description": "Programmation horaire simple",
+              "impact": "Les systèmes techniques fonctionnent selon des plages horaires fixes programmées à l'avance, permettant de réduire la consommation pendant les périodes d'inoccupation prévisibles.",
+              "images": []
+            }
+          },
+          "classe_B": {
+            "programmation_optimisee": {
+              "description": "Programmation optimisée avec anticipation",
+              "impact": "Les systèmes techniques sont démarrés et arrêtés de manière optimisée, avec anticipation des besoins (préchauffage, pré-ventilation) pour garantir le confort dès l'arrivée des occupants tout en minimisant la durée de fonctionnement.",
+              "images": []
+            }
+          },
+          "classe_A": {
+            "gestion_adaptative_temps_reel": {
+              "description": "Gestion adaptative en temps réel",
+              "impact": "Les temps de fonctionnement sont adaptés en temps réel en fonction de l'occupation effective, des conditions climatiques et des besoins énergétiques, assurant une optimisation maximale de la consommation.",
+              "images": []
+            }
+          }
+        }
+      },
+      "7.3_detection_defauts": {
+        "description": "Détection des défauts des systèmes et aide au diagnostic",
+        "classes": {
+          "classe_D": {
+            "aucune_detection": {
+              "description": "Aucune détection automatique",
+              "impact": "Les défauts ne sont détectés que lors de pannes évidentes ou de plaintes des occupants, entraînant des périodes de dysfonctionnement prolongées et une consommation énergétique excessive.",
+              "images": []
+            }
+          },
+          "classe_C": {
+            "detection_simple_alarmes": {
+              "description": "Détection simple avec alarmes",
+              "impact": "Des alarmes signalent les défauts majeurs, permettant une intervention plus rapide mais sans capacité d'analyse ou d'anticipation des problèmes.",
+              "images": []
+            }
+          },
+          "classe_B": {
+            "detection_avancee_diagnostic": {
+              "description": "Détection avancée avec outils de diagnostic",
+              "impact": "Le système identifie les défauts et propose un diagnostic préliminaire, facilitant la maintenance et réduisant le temps de résolution des problèmes.",
+              "images": []
+            }
+          },
+          "classe_A": {
+            "detection_predictive_intelligente": {
+              "description": "Détection prédictive et maintenance intelligente",
+              "impact": "Le système analyse en continu les données pour détecter les anomalies avant qu'elles ne deviennent des défauts, prédit les défaillances potentielles et optimise la maintenance préventive, maximisant l'efficacité énergétique et la durée de vie des équipements.",
+              "images": []
+            }
+          }
+        }
+      },
+      "7.4_compte_rendu_informations": {
+        "description": "Compte-rendu des informations concernant la consommation énergétique et les conditions intérieures",
+        "classes": {
+          "classe_D": {
+            "aucun_compte_rendu": {
+              "description": "Aucun compte-rendu automatique",
+              "impact": "Absence d'informations sur la consommation énergétique et les conditions intérieures, rendant impossible toute analyse ou optimisation basée sur les données.",
+              "images": []
+            }
+          },
+          "classe_C": {
+            "rapports_periodiques_simples": {
+              "description": "Rapports périodiques simples",
+              "impact": "Production de rapports basiques à intervalles réguliers, fournissant des informations générales sur la consommation mais avec peu de détails ou d'analyses.",
+              "images": []
+            }
+          },
+          "classe_B": {
+            "rapports_detailles_analyses": {
+              "description": "Rapports détaillés avec analyses comparatives",
+              "impact": "Rapports détaillés incluant des analyses comparatives, des tendances et des indicateurs de performance, permettant d'identifier les opportunités d'amélioration de l'efficacité énergétique.",
+              "images": []
+            }
+          },
+          "classe_A": {
+            "suivi_temps_reel_analytique": {
+              "description": "Suivi en temps réel avec analytique avancée",
+              "impact": "Tableau de bord en temps réel offrant une visualisation complète de la consommation énergétique et des conditions intérieures, avec analytique avancée, alertes personnalisées et recommandations d'optimisation automatiques.",
+              "images": []
+            }
+          }
+        }
+      },
+      "7.5_production_energie_locale": {
+        "description": "Production d'énergie locale et énergies renouvelables",
+        "classes": {
+          "classe_D": {
+            "aucune_gestion_automatique": {
+              "description": "Aucune gestion automatique",
+              "impact": "Les systèmes de production d'énergie locale fonctionnent de manière autonome sans coordination avec les besoins du bâtiment, réduisant leur efficacité globale.",
+              "images": []
+            }
+          },
+          "classe_C": {
+            "gestion_simple_priorites": {
+              "description": "Gestion simple des priorités",
+              "impact": "Gestion basique des priorités entre les différentes sources d'énergie, privilégiant les sources renouvelables lorsqu'elles sont disponibles.",
+              "images": []
+            }
+          },
+          "classe_B": {
+            "optimisation_production_consommation": {
+              "description": "Optimisation de la production et de la consommation",
+              "impact": "Coordination avancée entre production locale d'énergie et consommation du bâtiment, permettant de maximiser l'autoconsommation et de réduire les achats d'énergie externe.",
+              "images": []
+            }
+          },
+          "classe_A": {
+            "gestion_predictive_integree": {
+              "description": "Gestion prédictive intégrée",
+              "impact": "Système prédictif qui anticipe la production d'énergie renouvelable, la demande énergétique et les tarifs d'électricité pour optimiser en temps réel la production, le stockage et la consommation d'énergie, maximisant les économies et l'impact environnemental positif.",
+              "images": []
+            }
+          }
+        }
+      },
+      "7.6_recuperation_transfert_chaleur": {
+        "description": "Récupération de chaleur et transfert de chaleur",
+        "classes": {
+          "classe_D": {
+            "aucune_recuperation_automatique": {
+              "description": "Aucune récupération automatique",
+              "impact": "Les potentiels de récupération de chaleur ne sont pas exploités, entraînant des pertes énergétiques importantes et une consommation excessive pour le chauffage et le refroidissement.",
+              "images": []
+            }
+          },
+          "classe_C": {
+            "recuperation_simple": {
+              "description": "Récupération simple",
+              "impact": "Systèmes basiques de récupération de chaleur fonctionnant indépendamment, sans optimisation globale au niveau du bâtiment.",
+              "images": []
+            }
+          },
+          "classe_B": {
+            "recuperation_coordonnee": {
+              "description": "Récupération coordonnée",
+              "impact": "Coordination des différents systèmes de récupération de chaleur pour maximiser l'efficacité globale, avec transfert de chaleur entre zones ayant des besoins différents.",
+              "images": []
+            }
+          },
+          "classe_A": {
+            "gestion_optimisee_flux_thermiques": {
+              "description": "Gestion optimisée des flux thermiques",
+              "impact": "Optimisation complète et dynamique de tous les flux thermiques du bâtiment, incluant la récupération de chaleur, le stockage thermique et le transfert entre zones, maximisant l'efficacité énergétique globale.",
+              "images": []
+            }
+          }
+        }
+      },
+      "7.7_integration_reseau_intelligent": {
+        "description": "Intégration dans un réseau intelligent",
+        "classes": {
+          "classe_D": {
+            "aucune_integration": {
+              "description": "Aucune intégration",
+              "impact": "Le bâtiment fonctionne de manière isolée, sans interaction avec le réseau énergétique extérieur, ne bénéficiant pas des avantages des réseaux intelligents.",
+              "images": []
+            }
+          },
+          "classe_C": {
+            "integration_basique": {
+              "description": "Intégration basique",
+              "impact": "Capacité limitée à répondre aux signaux du réseau, comme les tarifs variables, permettant des économies financières modestes.",
+              "images": []
+            }
+          },
+          "classe_B": {
+            "integration_avancee": {
+              "description": "Intégration avancée",
+              "impact": "Participation active aux programmes de flexibilité énergétique, avec capacité à moduler la consommation en fonction des besoins du réseau tout en maintenant le confort des occupants.",
+              "images": []
+            }
+          },
+          "classe_A": {
+            "integration_bidirectionnelle_complete": {
+              "description": "Intégration bidirectionnelle complète",
+              "impact": "Le bâtiment fonctionne comme un acteur à part entière du réseau intelligent, capable d'acheter, de stocker et de revendre de l'énergie de manière optimisée, participant activement à la stabilité du réseau tout en maximisant les avantages économiques et environnementaux.",
+              "images": []
+            }
+          }
+        }
+      }
+    }
+  }
+}

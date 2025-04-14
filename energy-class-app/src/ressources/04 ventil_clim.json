@@ -1,0 +1,282 @@
+{
+  "4_ventilation_climatisation": {
+    "description": "Systèmes de ventilation et climatisation",
+    "sous_categories": {
+      "4.1_regulation_alimentation_air": {
+        "description": "Régulation de l'alimentation en air au niveau de la pièce",
+        "classes": {
+          "classe_D": {
+            "aucune_regulation_automatique": {
+              "description": "Aucune régulation automatique",
+              "impact": "Le système fonctionne constamment (par exemple, par un commutateur ou commande manuelle). Il y aura toujours un débit d'air constant (élevé) dans la pièce même si cela n'est pas nécessaire pour le confort (par exemple qualité d'air). Si elles sont commandées manuellement, ces installations sont souvent arrêtées trop tard ou pas du tout, comme le montre l'expérience. Il en résulte une consommation d'énergie inutilement élevée tant au niveau de la centrale de traitement d'air que du transport de l'air.",
+              "images": ["image_1"]
+            }
+          },
+          "classe_B": {
+            "regulation_programmee": {
+              "description": "Régulation programmée",
+              "impact": "Le système fonctionne conformément à un calendrier et des horaires donnés. Il y aura toujours un débit d'air constant (élevé) dans la pièce, mais en fonction d'un programme horaire. Dans cette approche, c'est la qualité du programme horaire et la possibilité de l'adapter qui déterminent si la ventilation n'est déclenchée que lorsque le confort l'exige. D'expérience, cette méthode conduit souvent à une ventilation superflue. Il en résulte une consommation d'énergie inutilement élevée tant au niveau de la centrale de traitement d'air que du transport de l'air.",
+              "images": ["image_1"]
+            },
+            "regulation_occupation": {
+              "description": "Régulation basée sur l'occupation",
+              "impact": "Le système fonctionne selon l'occupation (interrupteur d'éclairage, capteurs à infrarouges, etc.). Le recours à la détection de présence permet de ne ventiler une pièce que si elle est occupée. Ceci élimine les désavantages d'un programme horaire prédéfini et réduit la consommation d'énergie de la centrale de traitement d'air et du transport de l'air. Le débit d'air reste cependant constant (élevé).",
+              "images": ["image_1"]
+            }
+          },
+          "classe_A": {
+            "regulation_besoins": {
+              "description": "Régulation basée sur les besoins",
+              "impact": "Le système fonctionne selon les besoins en termes de qualité de l'air (mesure du CO2, des composés organiques volatils, etc.). Avec la régulation en fonction des besoins, les pièces ne sont ventilées que si elles sont utilisées, et uniquement dans la mesure nécessaire pour maintenir une qualité d'air correcte. Le débit d'air varie en fonction de la demande (par exemple du nombre de personnes dans la pièce, de la charge olfactive, ....) et seule la quantité d'air neuf requise doit être conditionnée et transportée.",
+              "images": ["image_1"]
+            }
+          }
+        }
+      },
+      "4.2_regulation_temperature_air": {
+        "description": "Régulation de la température de l'air ambiant par le système de ventilation",
+        "classes": {
+          "classe_D": {
+            "commande_marche_arret": {
+              "description": "Commande de mise en marche/arrêt",
+              "impact": "Débit d'air fixe et température d'alimentation en air fixe au niveau de la pièce; les points de consigne de température ambiante sont fixés individuellement. Ici, la ventilation n'agit qu'à minima sur la température ambiante. La température ambiante fluctue en fonction de la régulation tout ou rien. Une puissance de chauffage/refroidissement excessive est introduite dans la pièce, et l'énergie nécessaire au transport de l'air est particulièrement importante.",
+              "images": ["image_2"]
+            }
+          },
+          "classe_C": {
+            "commande_continue": {
+              "description": "Commande continue",
+              "impact": "Le débit d'air ou la température d'alimentation en air au niveau de la pièce peut être changé en continu; les points de consigne de température ambiante sont fixés individuellement. Le débit ou la température d'air soufflé sont ajustés par la régulation de la température ambiante. Pour la régulation du débit, une régulation de la température de soufflage pertinente doit être intégrée à un niveau supérieur. Pour la régulation de la température de soufflage au niveau de la pièce, le débit d'air est constant, ce qui entraîne une énergie de transport importante.",
+              "images": ["image_2"]
+            }
+          },
+          "classe_A": {
+            "regulation_optimisee": {
+              "description": "Régulation optimisée",
+              "impact": "Besoins énergétiques minimaux grâce à la régulation optimisée. Le débit d'air et la température d'alimentation en air au niveau de la pièce sont régulés en fonction de la charge de chauffage/refroidissement. Le débit d'air minimum requis est fourni aussi longtemps que possible. Ce n'est que lorsqu'il n'est plus possible de fournir une puissance de chauffage/refroidissement suffisante à la pièce que le débit est augmenté. La consommation d'énergie pour le transport et le conditionnement d'air sont optimisés.",
+              "images": ["image_2"]
+            }
+          }
+        }
+      },
+      "4.3_coordination_regulation": {
+        "description": "Coordination de la régulation de température de l'air ambiant par ventilation et par système statique",
+        "classes": {
+          "classe_D": {
+            "interaction_non_coordonnee": {
+              "description": "L'interaction n'est pas coordonnée",
+              "impact": "Des régulateurs en boucle fermée sont par exemple dédiés à chaque système pour maintenir indépendamment la température de l'air ambiant. Sans coordination, des boucles de régulation indépendantes risquent d'entrer mutuellement en conflit et les apports thermiques intérieurs et extérieurs ne peuvent pas être pris en compte. Il en résulte une consommation d'énergie superflue et parfois des températures ambiantes inconfortables.",
+              "images": ["image_3"]
+            }
+          },
+          "classe_A": {
+            "interaction_coordonnee": {
+              "description": "L'interaction est coordonnée",
+              "impact": "C'est-à-dire qu'un seul système est commandé par un régulateur en boucle fermée pour la température de l'air ambiant et que l'autre système climatise la pièce jusqu'à un niveau qui permet au régulateur en boucle fermée de bénéficier des apports thermiques internes et externes. Différentes parties du système fonctionnent de manière coordonnée les unes avec les autres pour toujours fournir une température ambiante confortable. La consommation d'énergie est maintenue à un niveau bas.",
+              "images": ["image_3"]
+            }
+          }
+        }
+      },
+      "4.4_regulation_debit_air_exterieur": {
+        "description": "Régulation du débit d'air extérieur",
+        "classes": {
+          "classe_C": {
+            "rapport_debit_fixe": {
+              "description": "Rapport ou débit d'air extérieur fixe",
+              "impact": "Le système fonctionne selon un rapport d'air extérieur donné, par exemple modifié manuellement. L'installation reçoit souvent un débit d'air neuf inutilement élevé qu'il faut conditionner. D'expérience, si l'on règle à un moment donné un débit d'air neuf élevé, on ne le réinitialise pas ultérieurement ce qui entraîne une forte consommation d'énergie en permanence pour le traitement de l'air neuf.",
+              "images": ["image_4"]
+            }
+          },
+          "classe_B": {
+            "rapport_debit_etage_horaire": {
+              "description": "Rapport ou débit d'air extérieur (faible/élevé) étagé conformément à un calendrier et des horaires donnés",
+              "impact": "Le débit d'air extérieur est réglé par paliers (par exemple, un programme horaire réduit le débit pendant le déjeuner, en fin d'après-midi, ...). Ceci permet de réduire la consommation d'énergie pour le traitement d'air neuf en conséquence. C'est la qualité du programme horaire et la possibilité de l'adapter qui déterminent si le débit d'air neuf est en adéquation avec l'occupation.",
+              "images": ["image_4"]
+            },
+            "rapport_debit_etage_occupation": {
+              "description": "Rapport ou débit d'air extérieur (faible/élevé) étagé en fonction de l'occupation",
+              "impact": "Avec une détection de présence, un débit d'air neuf élevé n'est fourni que si les pièces sont occupées. Ceci élimine les désavantages d'un programme horaire prédéfini et réduit dans une certaine mesure la consommation d'énergie pour le traitement de l'air. Le débit d'air neuf est néanmoins souvent trop élevé par rapport à la demande.",
+              "images": ["image_4"]
+            }
+          },
+          "classe_A": {
+            "regulation_progressive": {
+              "description": "Régulation progressive",
+              "impact": "Le système est régulé par des capteurs qui détectent le nombre de personnes ou les paramètres de l'air intérieur ou des critères adaptés (par exemple, capteurs de CO2, de mélanges gazeux ou de composés organiques volatils). Les paramètres utilisés doivent être adaptés au type d'activité utilisée dans l'espace. La stricte quantité d'air neuf nécessaire est envoyée à l'installation et traitée. Ceci permet de ne consommer que l'énergie nécessaire pour le traitement d'air d'un point de vue du débit d'air neuf.",
+              "images": ["image_4"]
+            }
+          }
+        }
+      },
+      "4.5_regulation_centrale_traitement_air": {
+        "description": "Régulation du débit ou de la pression d'air au niveau de la centrale de traitement d'air",
+        "classes": {
+          "classe_D": {
+            "aucune_regulation_automatique": {
+              "description": "Aucune régulation automatique",
+              "impact": "Fournit en continu un débit d'air pour une charge maximale pour toutes les pièces. Si la centrale de traitement d'air fonctionne, elle traite et transporte toujours le volume d'air maximum. Ces opérations entraînent une consommation d'énergie importante pour le conditionnement et le transport. Il se peut aussi que la centrale d'air soit en fonctionnement alors que cela n'est pas nécessaire.",
+              "images": ["image_5"]
+            }
+          },
+          "classe_C": {
+            "programmation_heures": {
+              "description": "Programmation des heures de mise en marche/arrêt",
+              "impact": "Fournit en continu un débit d'air pour une charge maximale pour toutes les pièces au cours d'un temps d'occupation nominal. La centrale de traitement d'air fonctionne pendant les heures d'occupation normales. Elle traite et transporte toujours le volume d'air maximum, ce qui entraîne une consommation d'énergie importante.",
+              "images": ["image_5"]
+            }
+          },
+          "classe_B": {
+            "regulation_multi_niveau": {
+              "description": "Régulation multi-niveau",
+              "impact": "Pour diminuer les besoins en énergie auxiliaire du ventilateur. Comme pour la programmation des heures de mise en marche/arrêt, mais le volume d'air est réglé par paliers (par exemple, un programme horaire réduit le niveau de fonctionnement pendant le déjeuner, en fin d'après-midi, ...). Le fonctionnement du ventilateur à vitesse réduite entraîne une baisse correspondante de la consommation de puissance pour le traitement d'air, et une baisse disproportionnée de la consommation de puissance pour le transport (voir les lois des proportions).",
+              "images": ["image_5"]
+            }
+          },
+          "classe_A": {
+            "regulation_debit_pression_sans_reinitialisation": {
+              "description": "Régulation automatique du débit ou de la pression sans réinitialisation de la pression",
+              "impact": "Charge en fonction des alimentations du débit d'air selon les besoins pour toutes les pièces communicantes. Comme pour la programmation des heures de mise en marche/arrêt, mais la pression fournie est régulée sur une consigne fixe par modulation de la vitesse de ventilation. Si les conditions de débit d'air changent dans les pièces, la pression dans les gaines est modifiée, entraînant une réaction de la régulation de pression pour adapter le débit en conséquence. Il en résulte une diminution de la consommation d'énergie pour le conditionnement et le transport. La consigne de pression est réglée en fonction du cas le plus critique, ce qui conduit à délivrer une pression inutilement élevée en charge partielle.",
+              "images": ["image_5"]
+            },
+            "regulation_debit_pression_reinitialisation": {
+              "description": "Régulation automatique du débit ou de la pression avec réinitialisation de la pression",
+              "impact": "Charge en fonction des alimentations du débit d'air selon les besoins pour toutes les pièces communicantes (pour les systèmes à volume d'air variable avec VFD). Comme la fonction précédente, mais la consigne de pression est régulée en fonction de la demande. Ceci garantit que toutes les pièces desservies reçoivent le volume d'air traité strictement nécessaire, à la pression minimale requise. Avec la collecte des demandes, la pièce ayant la demande la plus élevée sera suffisamment desservie à tout moment. La consommation d'énergie pour le conditionnement et le transport est ainsi réduite au maximum.",
+              "images": ["image_5"]
+            }
+          }
+        }
+      },
+      "4.6_regulation_recuperation_chaleur_gel": {
+        "description": "Régulation de la récupération de chaleur (protection contre le gel)",
+        "classes": {
+          "classe_D": {
+            "sans_protection": {
+              "description": "Sans protection contre le gel",
+              "impact": "Il n'existe aucune action particulière pour protéger l'échangeur de chaleur contre le gel. Dès que l'humidité de l'air extrait se transforme en givre dans l'échangeur (dont les lames d'air se couvrent de glace), il faut augmenter la puissance du ventilateur d'extraction, pour garantir une circulation d'air dans la pièce.",
+              "images": ["image_6"]
+            }
+          },
+          "classe_A": {
+            "avec_protection": {
+              "description": "Avec protection contre le gel",
+              "impact": "Une boucle de régulation permet de garantir que la température de l'air repris de l'échangeur de chaleur n'est pas trop basse afin d'éviter un gel. Avec une protection antigivre, il n'est pas nécessaire d'augmenter la puissance du ventilateur d'extraction. Noter que la protection antigivre est une fonction de sécurité du système plutôt qu'une fonction d'efficacité énergétique => envisager de l'exclure de l'évaluation. Il est aussi important de régler la valeur de limitation conformément aux instructions du fabricant, et de ne pas choisir d'emblée une valeur trop élevée pour éviter un chauffage inutile avec la batterie chaude.",
+              "images": ["image_6"]
+            }
+          }
+        }
+      },
+      "4.7_commande_recuperation_chaleur_surchauffe": {
+        "description": "Commande de récupération de chaleur (prévention des surchauffes)",
+        "classes": {
+          "classe_D": {
+            "sans_regulation_surchauffe": {
+              "description": "Sans régulation de surchauffe",
+              "impact": "Il n'existe aucune action particulière pour éviter les surchauffes. La récupération de chaleur est toujours 100 % et peut surchauffer l'air soufflé, ce qui nécessite une énergie supplémentaire pour le refroidissement.",
+              "images": ["image_7"]
+            }
+          },
+          "classe_A": {
+            "avec_regulation_surchauffe": {
+              "description": "Avec régulation de surchauffe",
+              "impact": "Au cours des périodes où l'effet de l'échangeur de chaleur ne sera plus positif, une boucle de régulation basculera entre les états «arrêt», «modulation» ou contournement de l'échangeur de chaleur. La détermination d'une séquence de régulation correcte du récupérateur de chaleur évite de refroidir inutilement l'air soufflé.",
+              "images": ["image_7"]
+            }
+          }
+        }
+      },
+      "4.8_refroidissement_mecanique_naturel": {
+        "description": "Refroidissement mécanique naturel",
+        "classes": {
+          "classe_D": {
+            "aucune_regulation_automatique": {
+              "description": "Aucune régulation automatique",
+              "impact": "L'air soufflé est toujours refroidi mécaniquement selon les besoins avec de l'énergie active.",
+              "images": ["image_8"]
+            }
+          },
+          "classe_C": {
+            "refroidissement_nocturne": {
+              "description": "Refroidissement nocturne",
+              "impact": "Refroidissement nocturne (refroidissement passif) : Pendant la nuit, la chaleur accumulée dans la structure du bâtiment est dissipée par de l'air frais extérieur jusqu'à ce que la limite basse de confort soit atteinte, réduisant ainsi le recours à une énergie de refroidissement active pendant la journée. Noter que cet air doit pouvoir parvenir à l'enveloppe des pièces (par exemple planchers, plafonds, murs). Si l'on utilise des systèmes de ventilation pour réguler la qualité d'air, il faut étudier consciencieusement l'effet possible du rafraîchissement nocturne en raison des volumes d'air plutôt modestes.",
+              "images": ["image_8"]
+            }
+          },
+          "classe_B": {
+            "refroidissement_naturel": {
+              "description": "Refroidissement naturel",
+              "impact": "Les quantités d'air extérieur et d'air de recirculation sont modulées au cours de toutes les périodes afin de réduire le plus possible la quantité de refroidissement mécanique. Un calcul est réalisé sur la base des températures. Il réduit la demande d'énergie au refroidissement actif du soufflage: Régime d'économie maximum: La récupération de chaleur s'ouvre tant que la température de l'air extrait est plus basse que celle de l'air neuf. Production d'eau froide avec air neuf: transfert direct de l'air soufflé vers la tour de refroidissement via des batteries froides et du réfrigérant. Est prioritaire (énergie à un tarif avantageux) tant que la température extérieure est suffisante pour le refroidissement.",
+              "images": ["image_8"]
+            }
+          },
+          "classe_A": {
+            "regulation_base_enthalpie": {
+              "description": "Régulation sur la base de l'enthalpie",
+              "impact": "Les quantités d'air extérieur et d'air de recirculation sont modulées au cours de toutes les périodes afin de réduire le plus possible la quantité de refroidissement mécanique. Un calcul est réalisé sur la base des températures et de l'humidité (enthalpie). Régime d'économie maximum: La récupération de chaleur s'ouvre tant que l'enthalpie de l'air extrait est plus basse que celle de l'air neuf, réduisant la demande d'énergie pour le refroidissement actif de l'air soufflé.",
+              "images": ["image_8"]
+            }
+          }
+        }
+      },
+      "4.9_regulation_temperature_air_centrale": {
+        "description": "Régulation de la température d'air au niveau de l'unité de traitement d'air (AHU)",
+        "classes": {
+          "classe_D": {
+            "aucune_regulation_automatique": {
+              "description": "Aucune régulation automatique",
+              "impact": "Aucune boucle de régulation ne permet d'agir sur la température de l'air introduit. La température de soufflage est fournie en continu en fonction de la charge maximum. La quantité maximale d'air soufflé est fournie en continu aux pièces ou mise à disposition pour retraitement, ce qui entraîne des déperditions énergétiques inutiles en charge partielle.",
+              "images": ["image_9"]
+            }
+          },
+          "classe_C": {
+            "point_consigne_constant": {
+              "description": "Point de consigne constant",
+              "impact": "Une boucle de régulation permet de réguler la température de l'air introduit. Le point de consigne est constant et ne peut être modifié que par une action manuelle. La température de soufflage est réglée manuellement. L'air est injecté dans les pièces ou mis à disposition pour retraitement. La température est certes augmentée manuellement au besoin, mais rarement ramenée ensuite à des niveaux qui correspondent aux besoins. Ce comportement n'est pas optimal.",
+              "images": ["image_9"]
+            }
+          },
+          "classe_B": {
+            "point_consigne_variable_exterieur": {
+              "description": "Point de consigne variable avec compensation de la température extérieure",
+              "impact": "Une boucle de régulation permet de réguler la température de l'air introduit. Le point de consigne est une fonction simple de la température extérieure (par exemple, une fonction linéaire). La température de l'air soufflé est régulée en fonction de la température extérieure (correspondant à la demande probable des différentes pièces). La charge individuelle de chaque pièce n'est toutefois pas prise en compte. Il est donc impossible d'agir sur le nombre de régulateurs terminaux qui effectuent un post-chauffage en été et un post- refroidissement en hiver.",
+              "images": ["image_9"]
+            }
+          },
+          "classe_A": {
+            "point_consigne_variable_charge": {
+              "description": "Point de consigne variable avec compensation en fonction de la charge",
+              "impact": "Une boucle de régulation permet de réguler la température de l'air introduit. Le point de consigne est défini comme une fonction des charges dans la pièce. Cela peut normalement être effectué uniquement avec un système de commande intégré permettant de collecter les températures ou la position des actionneurs dans les différentes pièces. Installation pour une seule pièce avec régulation cascade: La température de soufflage est réglée en fonction de la charge de l'installation dans la pièce unique ou dans la pièce de référence. Installation pour plusieurs pièces avec régulation terminale: La température de soufflage est réglée en fonction de la plus grande charge parmi toutes les pièces. Ceci permet de réduire le nombre de régulateurs d'ambiance qui effectuent un post-chauffage en été et un post-refroidissement en hiver. Remarques concernant les deux solutions: La demande d'énergie de l'installation de CVC chute à mesure que la charge diminue. Plus l'écart entre les consignes de chauffage et de refroidissement de tous les régulateurs d'ambiance est important (zones neutres importantes), plus la demande d'énergie de l'installation de CVC est réduite.",
+              "images": ["image_9"]
+            }
+          }
+        }
+      },
+      "4.10_regulation_humidite": {
+        "description": "Régulation de l'humidité",
+        "classes": {
+          "classe_D": {
+            "aucune_regulation_automatique": {
+              "description": "Aucune régulation automatique",
+              "impact": "Aucune boucle de régulation ne permet d'agir sur l'humidité dans l'air. L'humidité de l'air soufflé centralement n'est pas affectée.",
+              "images": ["image_10"]
+            }
+          },
+          "classe_C": {
+            "regulation_point_rosee": {
+              "description": "Régulation en fonction du point de rosée",
+              "impact": "L'humidité de l'air introduit ou de l'air ambiant est exprimée à l'aide de la température du point de rosée et du réchauffement de l'air introduit afin d'amener l'humidité relative jusqu'au point de consigne. La régulation au point de rosée requiert une énergie de refroidissement/réchauffage supplémentaire ainsi qu'une humidification pour garantir la température de ventilation nécessaire.",
+              "images": ["image_10"]
+            }
+          },
+          "classe_A": {
+            "regulation_humidite_directe": {
+              "description": "Régulation d'humidité directe",
+              "impact": "Humidité de l'air introduit ou de l'air ambiant; une boucle de régulation permet de fixer l'humidité de l'air introduit ou de l'air ambiant à un point de consigne donné. Le point de consigne est soit fixe et prédéfini par l'utilisateur, soit une valeur optimale variable à une énergie minimale mais dans les limites min/max de la condition de l'air ambiant. Humidification ou déshumidification (refroidissement et réchauffage) uniquement dans la mesure nécessaire. La consommation d'énergie en est réduite.",
+              "images": ["image_10"]
+            }
+          }
+        }
+      }
+    }
+  }
+}
