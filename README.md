@@ -68,4 +68,58 @@ Ce projet est sous licence MIT.
 
 ## 📞 Contact
 
-Pour toute question ou suggestion, n'hésitez pas à ouvrir une issue sur GitHub. 
+Pour toute question ou suggestion, n'hésitez pas à ouvrir une issue sur GitHub.
+
+## 📈 Roadmap & Développements Futurs
+
+### Priorité 1 - Gestion des Projets
+- Création et enregistrement de projets
+- Interface de gestion des projets (création, modification, suppression)
+- Système de sauvegarde des données par projet
+- Accès et modification des évaluations précédentes
+- Organisation des projets par client/bâtiment
+- Système de recherche et filtrage des projets
+
+### Priorité 2 - Analyse Financière
+- Calcul du taux de retour sur investissement (ROI)
+- Estimation des coûts des améliorations
+- Analyse comparative des différentes solutions
+- Tableaux de simulation financière
+- Export des analyses financières
+- Intégration des coûts énergétiques locaux
+
+### Priorité 3 - Prescription Automatique
+- Système de recommandation d'équipements techniques
+- Base de données des équipements disponibles
+- Matching automatique entre besoins et solutions
+- Génération de cahiers des charges
+- Comparaison des solutions techniques
+- Mise à jour automatique des catalogues produits
+
+### Autres Améliorations Prévues
+
+#### Fonctionnalités Techniques
+- Export des évaluations en PDF/Excel
+- Mode hors-ligne avec synchronisation
+- Historique des évaluations
+- Comparaison entre différents bâtiments
+- API REST pour l'intégration avec d'autres systèmes
+
+#### Expérience Utilisateur
+- Mode sombre/clair
+- Tableau de bord avec statistiques
+- Filtres et recherche avancée
+- Visualisations graphiques des résultats
+- Mode présentation pour les clients
+
+#### Gestion des Données
+- Multi-utilisateurs avec différents rôles
+- Sauvegarde automatique dans le cloud
+- Import/Export des données
+- Base de données de références
+
+#### Conformité et Normes
+- Intégration des dernières normes énergétiques
+- Mises à jour automatiques des réglementations
+- Génération de rapports de conformité
+- Suivi des évolutions réglementaires 
