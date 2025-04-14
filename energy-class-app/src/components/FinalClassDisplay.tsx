@@ -5,10 +5,11 @@ import { calculateFinalClass } from '../services/energyClassService';
 import { useAssessment } from '../contexts/AssessmentContext';
 import { useCategories } from '../contexts/CategoryContext';
 
-const FinalClassDisplay: React.FC = () => {
-  const { assessment } = useAssessment();
+const FinalClassDisplay: React.FC<{ projectId: string }> = ({ projectId }) => {
+  const { getAssessment } = useAssessment();
   const { categories } = useCategories();
   const enabledCategories = categories.filter(cat => cat.isEnabled).map(cat => cat.id);
+  const assessment = getAssessment(projectId);
   const finalClass = calculateFinalClass(assessment, enabledCategories);
 
   return (

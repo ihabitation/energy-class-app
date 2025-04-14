@@ -129,4 +129,93 @@ Pour toute question ou suggestion, n'hésitez pas à ouvrir une issue sur GitHub
 - Multi-utilisateurs avec différents rôles
 - Sauvegarde automatique dans le cloud
 - Import/Export des données
-- Base de données de références 
+- Base de données de références
+
+## Modification des Classifications Énergétiques
+
+Les classifications énergétiques sont définies dans les fichiers JSON situés dans `energy-class-app/src/ressources/`. Ces fichiers peuvent être modifiés pour refléter les évolutions de la réglementation.
+
+### Structure des Fichiers
+
+Chaque fichier JSON suit cette structure :
+```json
+{
+  "categorie_id": {
+    "description": "Description de la catégorie",
+    "sous_categories": {
+      "sous_categorie_id": {
+        "description": "Description de la sous-catégorie",
+        "classes": {
+          "classe_D": {
+            "option_id": {
+              "description": "Description de l'option",
+              "impact": "Impact sur la performance",
+              "images": []
+            }
+          },
+          // autres classes...
+        }
+      }
+    }
+  }
+}
+```
+
+### Modification des Classes
+
+Pour modifier la répartition des classes, plusieurs cas sont possibles :
+
+1. **Modifier les critères d'une classe existante**
+   - Modifiez directement la `description` et l'`impact` dans la classe concernée
+   ```json
+   "classe_A": {
+     "option_id": {
+       "description": "Nouvelle description",
+       "impact": "Nouvel impact"
+     }
+   }
+   ```
+
+2. **Échanger les critères entre classes**
+   - Pour déplacer les critères de la classe B vers la classe A, copiez le contenu complet de `classe_B` vers `classe_A`
+   ```json
+   // Avant
+   "classe_B": { "option_1": {...} }
+   "classe_A": { "option_2": {...} }
+   
+   // Après
+   "classe_B": { "option_2": {...} }
+   "classe_A": { "option_1": {...} }
+   ```
+
+3. **Ajouter une nouvelle classe**
+   - Ajoutez une nouvelle entrée dans l'objet "classes"
+   ```json
+   "classes": {
+     "classe_E": {
+       "nouvelle_option": {
+         "description": "Description de la nouvelle classe",
+         "impact": "Impact de la nouvelle classe",
+         "images": []
+       }
+     }
+   }
+   ```
+
+### Points Importants
+
+- Maintenez la cohérence des noms de classes entre tous les fichiers JSON
+- Assurez-vous que chaque classe contient les mêmes champs (description, impact)
+- Vérifiez la validité du format JSON après modification
+- Si vous ajoutez de nouvelles classes, le code TypeScript devra être mis à jour en conséquence
+
+### Emplacement des Fichiers
+
+Les fichiers de classification se trouvent dans :
+- `energy-class-app/src/ressources/01 chauffage.json`
+- `energy-class-app/src/ressources/02 ECS.json`
+- `energy-class-app/src/ressources/03 refroidissement.json`
+- `energy-class-app/src/ressources/04 ventil_clim.json`
+- `energy-class-app/src/ressources/05 eclairage.json`
+- `energy-class-app/src/ressources/06 stores.json`
+- `energy-class-app/src/ressources/07 GTB.json` 

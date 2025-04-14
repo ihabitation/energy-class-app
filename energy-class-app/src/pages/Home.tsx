@@ -1,28 +1,62 @@
 import React from 'react';
-import { Container, Typography, Box } from '@mui/material';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Container, Typography, Box, Button, Paper } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CategoryList from '../components/CategoryList';
 import FinalClassDisplay from '../components/FinalClassDisplay';
-import { useAssessment } from '../contexts/AssessmentContext';
+import { useProjects } from '../contexts/ProjectContext';
 import { useCategories } from '../contexts/CategoryContext';
+import { useAssessment } from '../contexts/AssessmentContext';
 
 const Home: React.FC = () => {
-  const { assessment } = useAssessment();
+  const { projectId } = useParams<{ projectId: string }>();
+  const navigate = useNavigate();
+  const { projects } = useProjects();
   const { categories, toggleCategory } = useCategories();
+  const { getAssessment } = useAssessment();
+
+  const handleCategoryToggle = (categoryId: string) => {
+    toggleCategory(categoryId);
+  };
+
+  const currentProject = projects.find(p => p.id === projectId);
+
+  if (!currentProject) {
+    return (
+      <Container>
+        <Typography color="error" sx={{ mt: 2 }}>
+          Projet non trouvé
+        </Typography>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg">
       <Box sx={{ my: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Évaluation de la performance énergétique
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(`/projects/${projectId}`)}
+          sx={{ mb: 2 }}
+        >
+          Retour au projet
+        </Button>
+
+        <Typography variant="h4" component="h1" gutterBottom>
+          {currentProject.name}
         </Typography>
-        <Typography variant="body1" paragraph>
-          Sélectionnez les catégories à évaluer pour déterminer la classe énergétique de votre bâtiment.
+
+        <FinalClassDisplay projectId={projectId || ''} />
+
+        <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4 }}>
+          Catégories à évaluer
         </Typography>
-        <FinalClassDisplay />
-        <CategoryList 
+
+        <CategoryList
           categories={categories}
-          onCategoryToggle={toggleCategory}
-          assessment={assessment}
+          onCategoryToggle={handleCategoryToggle}
+          projectId={projectId || ''}
+          assessment={projectId ? getAssessment(projectId) : {}}
         />
       </Box>
     </Container>

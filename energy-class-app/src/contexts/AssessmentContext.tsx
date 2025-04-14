@@ -2,27 +2,39 @@ import React, { createContext, useContext, useState } from 'react';
 import { BuildingAssessment } from '../types/energyClass';
 
 interface AssessmentContextType {
-  assessment: BuildingAssessment;
-  updateAssessment: (subCategoryId: string, selectedClass: 'A' | 'B' | 'C' | 'D' | 'NA', selectedOption: string) => void;
+  getAssessment: (projectId: string) => BuildingAssessment;
+  updateAssessment: (projectId: string, subCategoryId: string, selectedClass: 'A' | 'B' | 'C' | 'D' | 'NA', selectedOption: string) => void;
 }
 
 const AssessmentContext = createContext<AssessmentContextType | undefined>(undefined);
 
 export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [assessment, setAssessment] = useState<BuildingAssessment>({});
+  const [assessments, setAssessments] = useState<Record<string, BuildingAssessment>>({});
 
-  const updateAssessment = (subCategoryId: string, selectedClass: 'A' | 'B' | 'C' | 'D' | 'NA', selectedOption: string) => {
-    setAssessment(prev => ({
+  const getAssessment = (projectId: string) => {
+    return assessments[projectId] || {};
+  };
+
+  const updateAssessment = (
+    projectId: string,
+    subCategoryId: string,
+    selectedClass: 'A' | 'B' | 'C' | 'D' | 'NA',
+    selectedOption: string
+  ) => {
+    setAssessments(prev => ({
       ...prev,
-      [subCategoryId]: {
-        selectedClass,
-        selectedOption
+      [projectId]: {
+        ...prev[projectId],
+        [subCategoryId]: {
+          selectedClass,
+          selectedOption
+        }
       }
     }));
   };
 
   return (
-    <AssessmentContext.Provider value={{ assessment, updateAssessment }}>
+    <AssessmentContext.Provider value={{ getAssessment, updateAssessment }}>
       {children}
     </AssessmentContext.Provider>
   );

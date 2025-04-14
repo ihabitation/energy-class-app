@@ -4,26 +4,47 @@ import { SubCategory } from '../types/energyClass';
 import { getClassColor, getClassTextColor } from '../utils/colors';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useAssessment } from '../contexts/AssessmentContext';
+import { useNavigate } from 'react-router-dom';
 
 interface ClassSelectionProps {
-  subCategory: SubCategory;
-  onClassSelection: (selectedClass: 'A' | 'B' | 'C' | 'D' | 'NA', selectedOption: string) => void;
+  subCategoryId: string;
+  projectId: string;
+  options: {
+    id: string;
+    name: string;
+    description: string;
+    impact: string;
+    class: 'A' | 'B' | 'C' | 'D' | 'NA';
+  }[];
 }
 
-const ClassSelection: React.FC<ClassSelectionProps> = ({ subCategory, onClassSelection }) => {
-  const { assessment } = useAssessment();
-  const selectedClass = assessment[subCategory.id]?.selectedClass;
+const ClassSelection: React.FC<ClassSelectionProps> = ({
+  subCategoryId,
+  projectId,
+  options,
+}) => {
+  const { getAssessment, updateAssessment } = useAssessment();
+  const assessment = getAssessment(projectId);
+  const selectedClass = assessment[subCategoryId]?.selectedClass;
+  const selectedOption = assessment[subCategoryId]?.selectedOption;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const navigate = useNavigate();
 
   // Filtrer les classes disponibles en fonction des options de la sous-catégorie
-  const availableClasses = ['A', 'B', 'C', 'D', 'NA'].filter(classType => {
+  const availableClasses = ['NA', 'A', 'B', 'C', 'D'].filter(classType => {
     if (classType === 'NA') return true; // Toujours garder l'option NA
-    return subCategory.options?.some(opt => opt.class === classType);
+    return options?.some(opt => opt.class === classType);
   }) as ('A' | 'B' | 'C' | 'D' | 'NA')[];
 
   const getClassDescription = (energyClass: typeof availableClasses[number]) => {
-    const classData = subCategory.options?.find(opt => opt.class === energyClass);
+    if (energyClass === 'NA') {
+      return {
+        short: 'Non applicable',
+        full: 'Cette fonction n\'est pas présente dans le bâtiment'
+      };
+    }
+    const classData = options?.find(opt => opt.class === energyClass);
     if (classData) {
       return {
         short: classData.description.split('.')[0] + '.',
@@ -32,8 +53,14 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({ subCategory, onClassSel
     }
     return {
       short: 'Non applicable',
-      full: 'Cette fonction n\'est pas présente dans le bâtiment'
+      full: 'Cette sous-catégorie n\'est pas applicable à ce bâtiment'
     };
+  };
+
+  const handleClassSelection = (energyClass: 'A' | 'B' | 'C' | 'D' | 'NA', optionId: string) => {
+    const selectedOption = options.find(opt => opt.class === energyClass)?.id || '';
+    updateAssessment(projectId, subCategoryId, energyClass, selectedOption);
+    navigate(`/projects/${projectId}/category/${subCategoryId.split('.')[0]}`);
   };
 
   return (
@@ -50,10 +77,10 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({ subCategory, onClassSel
         }}
       >
         <Typography variant={isMobile ? "h6" : "h5"} gutterBottom>
-          {subCategory.name}
+          {options?.find(opt => opt.id === subCategoryId)?.name}
         </Typography>
         <Typography variant="body1" paragraph>
-          {subCategory.description}
+          {options?.find(opt => opt.id === subCategoryId)?.description}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {isMobile ? "Appuyez sur les classes pour plus de détails" : "Survolez les classes pour plus de détails"}
@@ -92,7 +119,7 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({ subCategory, onClassSel
                   }}
                 >
                   <CardActionArea 
-                    onClick={() => onClassSelection(energyClass, '')}
+                    onClick={() => handleClassSelection(energyClass, '')}
                     sx={{ height: '100%', p: isMobile ? 1 : 2 }}
                   >
                     <CardContent sx={{ p: isMobile ? 1 : 2 }}>

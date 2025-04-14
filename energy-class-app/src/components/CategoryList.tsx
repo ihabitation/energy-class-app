@@ -11,19 +11,22 @@ import AirIcon from '@mui/icons-material/Air';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import BlindsIcon from '@mui/icons-material/Blinds';
 import RouterIcon from '@mui/icons-material/Router';
+import { BuildingAssessment } from '../types/energyClass';
 
 interface CategoryListProps {
   categories: Category[];
   onCategoryToggle: (categoryId: string) => void;
-  assessment: { [key: string]: { selectedClass: string; selectedOption: string } };
+  assessment: BuildingAssessment;
+  projectId: string;
 }
 
-const CategoryList: React.FC<CategoryListProps> = ({ categories, onCategoryToggle, assessment }) => {
+const CategoryList: React.FC<CategoryListProps> = ({ categories, onCategoryToggle, assessment, projectId }) => {
   const getCategoryProgress = (categoryId: string) => {
     const subCategories = getSubCategories(categoryId);
-    const completedSubCategories = subCategories.filter(subCat => 
-      assessment[subCat.id]?.selectedClass !== undefined
-    ).length;
+    const completedSubCategories = subCategories.filter(subCat => {
+      const selectedClass = assessment[subCat.id]?.selectedClass;
+      return selectedClass !== undefined;
+    }).length;
     const totalSubCategories = subCategories.length;
     return {
       completed: completedSubCategories,
@@ -36,11 +39,13 @@ const CategoryList: React.FC<CategoryListProps> = ({ categories, onCategoryToggl
     const subCategories = getSubCategories(categoryId);
     const classes = subCategories
       .map(subCat => assessment[subCat.id]?.selectedClass)
-      .filter(Boolean) as ('A' | 'B' | 'C' | 'D' | 'NA')[];
+      .filter((classType): classType is 'A' | 'B' | 'C' | 'D' => 
+        classType !== undefined && ['A', 'B', 'C', 'D'].includes(classType)
+      );
     
     if (classes.length === 0) return 'NA';
     
-    const classValues = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'NA': 5 };
+    const classValues = { 'A': 1, 'B': 2, 'C': 3, 'D': 4 };
     return classes.reduce((worst, current) => 
       classValues[current] > classValues[worst] ? current : worst
     );
@@ -94,7 +99,7 @@ const CategoryList: React.FC<CategoryListProps> = ({ categories, onCategoryToggl
           >
             <ListItemButton
               component={Link}
-              to={`/category/${category.id}`}
+              to={`/projects/${projectId}/category/${category.id}`}
               disabled={!category.isEnabled}
               sx={{
                 backgroundColor: category.isEnabled ? 'transparent' : '#f5f5f5',
@@ -118,7 +123,7 @@ const CategoryList: React.FC<CategoryListProps> = ({ categories, onCategoryToggl
                     {worstClass !== 'NA' && (
                       <Chip
                         size="small"
-                        label={worstClass}
+                        label={`Classe ${worstClass}`}
                         sx={{
                           backgroundColor: getClassColor(worstClass),
                           color: getClassTextColor(worstClass),

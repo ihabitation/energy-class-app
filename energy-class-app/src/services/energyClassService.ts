@@ -120,13 +120,12 @@ export const getClassOptions = (categoryId: string, subCategoryId: string): Clas
   return options;
 };
 
-export const calculateFinalClass = (assessment: BuildingAssessment, enabledCategories: string[]): 'A' | 'B' | 'C' | 'D' => {
+export const calculateFinalClass = (assessment: BuildingAssessment, enabledCategories: string[]): 'A' | 'B' | 'C' | 'D' | 'NA' => {
   const classCounts: { [key: string]: number } = {
     'A': 0,
     'B': 0,
     'C': 0,
-    'D': 0,
-    'NA': 0
+    'D': 0
   };
 
   // Compter le nombre d'occurrences de chaque classe pour les catégories activées
@@ -137,10 +136,10 @@ export const calculateFinalClass = (assessment: BuildingAssessment, enabledCateg
     }
   });
 
-  // Si aucune classe n'est sélectionnée, retourner D
+  // Si aucune classe n'est sélectionnée, retourner NA
   const totalSelected = classCounts['A'] + classCounts['B'] + classCounts['C'] + classCounts['D'];
   if (totalSelected === 0) {
-    return 'D';
+    return 'NA';
   }
 
   // Retourner la pire classe qui a été sélectionnée

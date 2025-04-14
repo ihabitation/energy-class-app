@@ -1,36 +1,94 @@
 import React from 'react';
-import { List, Container, Box, useTheme, useMediaQuery } from '@mui/material';
-import { useParams } from 'react-router-dom';
-import SubCategoryListItem from './SubCategoryListItem';
-import { useAssessment } from '../contexts/AssessmentContext';
+import { Link } from 'react-router-dom';
+import { List, ListItem, ListItemText, ListItemButton, Box, Chip, Paper, Typography, Grid } from '@mui/material';
 import { getSubCategories } from '../services/energyClassService';
+import { getClassColor, getClassTextColor } from '../utils/colors';
+import { useAssessment } from '../contexts/AssessmentContext';
 
-const SubCategoryList: React.FC = () => {
-  const { categoryId } = useParams<{ categoryId: string }>();
-  const { assessment } = useAssessment();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
-  const subCategories = getSubCategories(categoryId || '');
+interface SubCategoryListProps {
+  categoryId: string;
+  projectId: string;
+}
+
+const SubCategoryList: React.FC<SubCategoryListProps> = ({ categoryId, projectId }) => {
+  const { getAssessment } = useAssessment();
+  const assessment = getAssessment(projectId);
+  const subCategories = getSubCategories(categoryId);
 
   return (
-    <Container maxWidth="lg" sx={{ py: isMobile ? 1 : 2 }}>
-      <List sx={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        gap: 1.5
-      }}>
-        {subCategories.map((subCategory) => (
-          <SubCategoryListItem
-            key={subCategory.id}
-            subCategory={subCategory}
-            selectedClass={assessment[subCategory.id]?.selectedClass}
-            selectedOption={assessment[subCategory.id]?.selectedOption}
-            categoryId={categoryId || ''}
-          />
-        ))}
-      </List>
-    </Container>
+    <Grid container spacing={3}>
+      {subCategories.map((subCategory) => {
+        const selectedClass = assessment[subCategory.id]?.selectedClass;
+        const selectedOption = assessment[subCategory.id]?.selectedOption;
+
+        return (
+          <Grid item xs={12} sm={6} md={4} key={subCategory.id}>
+            <Paper 
+              elevation={1}
+              sx={{
+                height: '100%',
+                transition: 'all 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: 3
+                }
+              }}
+            >
+              <ListItemButton
+                component={Link}
+                to={`/projects/${projectId}/category/${categoryId}/subcategory/${subCategory.id}`}
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  p: 2
+                }}
+              >
+                <Box sx={{ width: '100%', mb: 2 }}>
+                  <Typography variant="h6" gutterBottom>
+                    {subCategory.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    {subCategory.description}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ 
+                  mt: 'auto', 
+                  width: '100%', 
+                  display: 'flex', 
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  {selectedClass ? (
+                    <Chip
+                      label={selectedClass}
+                      size="small"
+                      sx={{
+                        backgroundColor: getClassColor(selectedClass),
+                        color: getClassTextColor(selectedClass),
+                      }}
+                    />
+                  ) : (
+                    <Chip
+                      label="Non évalué"
+                      size="small"
+                      variant="outlined"
+                    />
+                  )}
+                  {selectedOption && (
+                    <Typography variant="caption" color="text.secondary">
+                      Option : {selectedOption}
+                    </Typography>
+                  )}
+                </Box>
+              </ListItemButton>
+            </Paper>
+          </Grid>
+        );
+      })}
+    </Grid>
   );
 };
 
