@@ -21,6 +21,9 @@ import { useCategories } from '../contexts/CategoryContext';
 import { useAssessment } from '../contexts/AssessmentContext';
 import { calculateFinalClass } from '../services/energyClassService';
 import { getSubCategories } from '../services/energyClassService';
+import TechnicalSolutionsList from '../components/TechnicalSolutionsList';
+import TechnicalSolutionForm from '../components/TechnicalSolutionForm';
+import SupabaseTest from '../components/SupabaseTest';
 
 const statusLabels: Record<ProjectStatus, string> = {
   draft: 'Brouillon',
@@ -35,6 +38,7 @@ const ProjectDetail: React.FC = () => {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showTechnicalSolutions, setShowTechnicalSolutions] = useState(false);
   const { categories } = useCategories();
   const { getAssessment } = useAssessment();
   const assessment = projectId ? getAssessment(projectId) : {};
@@ -104,6 +108,8 @@ const ProjectDetail: React.FC = () => {
       >
         Retour aux projets
       </Button>
+
+      <SupabaseTest />
 
       <Paper 
         elevation={3} 
@@ -206,6 +212,30 @@ const ProjectDetail: React.FC = () => {
               </Grid>
             </Grid>
           </Paper>
+
+          <Box mt={3}>
+            <Paper sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6">
+                  Solutions techniques
+                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={() => setShowTechnicalSolutions(!showTechnicalSolutions)}
+                >
+                  {showTechnicalSolutions ? 'Masquer' : 'Afficher'}
+                </Button>
+              </Box>
+              {showTechnicalSolutions && (
+                <>
+                  <TechnicalSolutionsList />
+                  <Box mt={3}>
+                    <TechnicalSolutionForm />
+                  </Box>
+                </>
+              )}
+            </Paper>
+          </Box>
         </Grid>
 
         <Grid item xs={12} md={4}>
@@ -267,26 +297,25 @@ const ProjectDetail: React.FC = () => {
             </Grid>
           </Paper>
 
-          <Paper sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
-              <Button
-                variant="contained"
-                startIcon={<AssessmentIcon />}
-                onClick={() => navigate(`/projects/${projectId}/assessment`)}
-                fullWidth
-              >
-                Évaluer
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<EditIcon />}
-                onClick={() => navigate(`/projects/${projectId}/edit`)}
-                fullWidth
-              >
-                Modifier
-              </Button>
-            </Box>
-          </Paper>
+          <Box sx={{ mt: 3 }}>
+            <Button
+              variant="contained"
+              startIcon={<AssessmentIcon />}
+              onClick={() => navigate(`/projects/${projectId}/assessment`)}
+              fullWidth
+              sx={{ mb: 2 }}
+            >
+              Évaluer
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<EditIcon />}
+              onClick={() => navigate(`/projects/${projectId}/edit`)}
+              fullWidth
+            >
+              Modifier
+            </Button>
+          </Box>
         </Grid>
       </Grid>
     </Container>
