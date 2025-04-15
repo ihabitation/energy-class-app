@@ -5,6 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { CategoryProvider } from './contexts/CategoryContext';
 import { AssessmentProvider } from './contexts/AssessmentContext';
 import { ProjectProvider } from './contexts/ProjectContext';
+import { TechnicalSolutionProvider } from './contexts/TechnicalSolutionContext';
 import theme from './theme';
 import Home from './pages/Home';
 import CategoryDetail from './pages/CategoryDetail';
@@ -20,17 +21,19 @@ function App() {
       <ProjectProvider>
         <CategoryProvider>
           <AssessmentProvider>
-            <Router>
-              <Routes>
-                <Route path="/" element={<ProjectList />} />
-                <Route path="/projects/new" element={<ProjectForm />} />
-                <Route path="/projects/:projectId" element={<ProjectDetail />} />
-                <Route path="/projects/:projectId/edit" element={<ProjectForm />} />
-                <Route path="/projects/:projectId/assessment" element={<Home />} />
-                <Route path="/projects/:projectId/category/:categoryId" element={<CategoryDetail />} />
-                <Route path="/projects/:projectId/category/:categoryId/subcategory/:subCategoryId" element={<SubCategoryDetail />} />
-              </Routes>
-            </Router>
+            <TechnicalSolutionProvider>
+              <Router>
+                <Routes>
+                  <Route path="/" element={<ProjectList />} />
+                  <Route path="/projects/new" element={<ProjectForm />} />
+                  <Route path="/projects/:projectId" element={<ProjectDetail />} />
+                  <Route path="/projects/:projectId/edit" element={<ProjectForm />} />
+                  <Route path="/projects/:projectId/assessment" element={<Home />} />
+                  <Route path="/projects/:projectId/category/:categoryId" element={<CategoryDetail />} />
+                  <Route path="/projects/:projectId/category/:categoryId/subcategory/:subCategoryId" element={<SubCategoryDetail />} />
+                </Routes>
+              </Router>
+            </TechnicalSolutionProvider>
           </AssessmentProvider>
         </CategoryProvider>
       </ProjectProvider>
