@@ -16,7 +16,9 @@ const Home: React.FC = () => {
   const { getAssessment } = useAssessment();
 
   const handleCategoryToggle = (categoryId: string) => {
-    toggleCategory(categoryId);
+    if (projectId) {
+      toggleCategory(categoryId, projectId);
+    }
   };
 
   const currentProject = projects.find(p => p.id === projectId);
@@ -53,8 +55,6 @@ const Home: React.FC = () => {
         </Typography>
 
         <CategoryList
-          categories={categories}
-          onCategoryToggle={handleCategoryToggle}
           projectId={projectId || ''}
           assessment={projectId ? getAssessment(projectId) : {}}
         />

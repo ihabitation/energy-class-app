@@ -60,8 +60,6 @@ const Assessment: React.FC = () => {
 
       <Box sx={{ mt: 4 }}>
         <CategoryList
-          categories={categories}
-          onCategoryToggle={toggleCategory}
           assessment={assessment}
           projectId={projectId}
         />

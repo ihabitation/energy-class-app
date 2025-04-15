@@ -159,6 +159,20 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['notifications']['Row'], 'id' | 'created_at'>;
         Update: Partial<Database['public']['Tables']['notifications']['Insert']>;
       };
+      global_results: {
+        Row: {
+          id: string;
+          project_id: string;
+          final_class: 'A' | 'B' | 'C' | 'D' | 'NA';
+          enabled_categories: string[];
+          disabled_categories: string[];
+          last_updated: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['global_results']['Row'], 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['global_results']['Insert']>;
+      };
     };
   };
 };

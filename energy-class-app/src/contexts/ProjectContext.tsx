@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Project, ProjectSummary, ProjectFilters } from '../types/project';
 import { projectService } from '../services/projectService';
+import { supabase } from '../lib/supabase';
 
 interface ProjectContextType {
   projects: ProjectSummary[];

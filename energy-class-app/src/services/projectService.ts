@@ -1,100 +1,140 @@
-import { v4 as uuidv4 } from 'uuid';
 import { Project, ProjectSummary, ProjectFilters } from '../types/project';
+import { supabase } from '../lib/supabase';
+import { Database } from '../types/supabase';
 
-const STORAGE_KEY = 'energy_class_projects';
+type ProjectRow = Database['public']['Tables']['projects']['Row'];
+type AssessmentRow = Database['public']['Tables']['assessments']['Row'];
 
 class ProjectService {
-  private projects: Project[] = [];
-
-  constructor() {
-    this.loadProjects();
-  }
-
-  private loadProjects(): void {
-    const storedProjects = localStorage.getItem(STORAGE_KEY);
-    if (storedProjects) {
-      this.projects = JSON.parse(storedProjects, (key, value) => {
-        if (key === 'createdAt' || key === 'updatedAt' || key === 'lastUpdated' || key === 'lastRenovation') {
-          return new Date(value);
-        }
-        return value;
-      });
-    }
-  }
-
-  private saveProjects(): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.projects));
-  }
-
   async createProject(projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>): Promise<Project> {
-    const newProject: Project = {
-      ...projectData,
-      id: uuidv4(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      assessments: projectData.assessments || {}
-    };
+    const { data: project, error } = await supabase
+      .from('projects')
+      .insert({
+        name: projectData.name,
+        description: projectData.description || null,
+        client_name: projectData.clientName,
+        address: {
+          street: projectData.address.street,
+          city: projectData.address.city,
+          postal_code: projectData.address.postalCode,
+          country: projectData.address.country
+        },
+        status: projectData.status,
+        metadata: {
+          building_type: projectData.metadata.buildingType,
+          construction_year: projectData.metadata.constructionYear,
+          total_area: projectData.metadata.totalArea,
+          floors: projectData.metadata.floors,
+          last_renovation: projectData.metadata.lastRenovation?.toISOString()
+        }
+      })
+      .select()
+      .single();
 
-    this.projects.push(newProject);
-    this.saveProjects();
-    return newProject;
+    if (error) throw error;
+
+    return this.convertProjectRowToProject(project);
   }
 
   async getProject(id: string): Promise<Project | null> {
-    const project = this.projects.find(p => p.id === id);
-    return project || null;
+    const { data: project, error } = await supabase
+      .from('projects')
+      .select(`
+        *,
+        assessments (*)
+      `)
+      .eq('id', id)
+      .single();
+
+    if (error) return null;
+    if (!project) return null;
+
+    return this.convertProjectRowToProject(project);
   }
 
   async updateProject(id: string, updates: Partial<Omit<Project, 'id' | 'createdAt'>>): Promise<Project | null> {
-    const index = this.projects.findIndex(p => p.id === id);
-    if (index === -1) return null;
+    const { data: project, error } = await supabase
+      .from('projects')
+      .update({
+        name: updates.name,
+        description: updates.description,
+        client_name: updates.clientName,
+        address: updates.address && {
+          street: updates.address.street,
+          city: updates.address.city,
+          postal_code: updates.address.postalCode,
+          country: updates.address.country
+        },
+        status: updates.status,
+        metadata: updates.metadata && {
+          building_type: updates.metadata.buildingType,
+          construction_year: updates.metadata.constructionYear,
+          total_area: updates.metadata.totalArea,
+          floors: updates.metadata.floors,
+          last_renovation: updates.metadata.lastRenovation?.toISOString()
+        }
+      })
+      .eq('id', id)
+      .select(`
+        *,
+        assessments (*)
+      `)
+      .single();
 
-    const updatedProject: Project = {
-      ...this.projects[index],
-      ...updates,
-      updatedAt: new Date()
-    };
-
-    this.projects[index] = updatedProject;
-    this.saveProjects();
-    return updatedProject;
+    if (error) return null;
+    return this.convertProjectRowToProject(project);
   }
 
   async deleteProject(id: string): Promise<boolean> {
-    const index = this.projects.findIndex(p => p.id === id);
-    if (index === -1) return false;
+    // Supprimer d'abord les entrées dans global_results
+    const { error: globalResultsError } = await supabase
+      .from('global_results')
+      .delete()
+      .eq('project_id', id);
 
-    this.projects.splice(index, 1);
-    this.saveProjects();
-    return true;
+    if (globalResultsError) {
+      console.error('Erreur lors de la suppression des résultats globaux:', globalResultsError);
+      return false;
+    }
+
+    // Supprimer le projet
+    const { error: projectError } = await supabase
+      .from('projects')
+      .delete()
+      .eq('id', id);
+
+    return !projectError;
   }
 
   async getProjects(filters?: ProjectFilters): Promise<ProjectSummary[]> {
-    let filteredProjects = [...this.projects];
+    let query = supabase
+      .from('projects')
+      .select(`
+        *,
+        assessments (*)
+      `);
 
     if (filters) {
       if (filters.status) {
-        filteredProjects = filteredProjects.filter(p => p.status === filters.status);
+        query = query.eq('status', filters.status);
       }
       if (filters.clientName) {
-        filteredProjects = filteredProjects.filter(p => 
-          p.clientName.toLowerCase().includes(filters.clientName!.toLowerCase())
-        );
+        query = query.ilike('client_name', `%${filters.clientName}%`);
       }
       if (filters.buildingType) {
-        filteredProjects = filteredProjects.filter(p => 
-          p.metadata.buildingType === filters.buildingType
-        );
+        query = query.eq('metadata->building_type', filters.buildingType);
       }
       if (filters.dateRange) {
-        filteredProjects = filteredProjects.filter(p => 
-          p.createdAt >= filters.dateRange!.start && 
-          p.createdAt <= filters.dateRange!.end
-        );
+        query = query
+          .gte('created_at', filters.dateRange.start.toISOString())
+          .lte('created_at', filters.dateRange.end.toISOString());
       }
     }
 
-    return filteredProjects.map(project => this.createProjectSummary(project));
+    const { data: projects, error } = await query;
+
+    if (error) throw error;
+    return projects.map(project => this.createProjectSummary(this.convertProjectRowToProject(project)));
   }
 
   private createProjectSummary(project: Project): ProjectSummary {
@@ -143,6 +183,48 @@ class ProjectService {
         ? current 
         : worst
     ) as 'A' | 'B' | 'C' | 'D' | 'NA';
+  }
+
+  private convertProjectRowToProject(row: ProjectRow & { assessments?: AssessmentRow[] }): Project {
+    const assessments: Project['assessments'] = {};
+    
+    if (row.assessments) {
+      row.assessments.forEach(assessment => {
+        if (!assessments[assessment.category_id]) {
+          assessments[assessment.category_id] = {};
+        }
+        assessments[assessment.category_id][assessment.sub_category_id] = {
+          selectedClass: assessment.selected_class,
+          selectedOption: assessment.selected_option,
+          notes: assessment.notes || undefined,
+          lastUpdated: new Date(assessment.last_updated)
+        };
+      });
+    }
+
+    return {
+      id: row.id,
+      name: row.name,
+      description: row.description || undefined,
+      clientName: row.client_name,
+      address: {
+        street: row.address.street,
+        city: row.address.city,
+        postalCode: row.address.postal_code,
+        country: row.address.country
+      },
+      createdAt: new Date(row.created_at),
+      updatedAt: new Date(row.updated_at),
+      status: row.status,
+      assessments,
+      metadata: {
+        buildingType: row.metadata.building_type,
+        constructionYear: row.metadata.construction_year,
+        totalArea: row.metadata.total_area,
+        floors: row.metadata.floors,
+        lastRenovation: row.metadata.last_renovation ? new Date(row.metadata.last_renovation) : undefined
+      }
+    };
   }
 }
 

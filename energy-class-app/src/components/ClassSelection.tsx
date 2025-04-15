@@ -57,10 +57,15 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({
     };
   };
 
-  const handleClassSelection = (energyClass: 'A' | 'B' | 'C' | 'D' | 'NA', optionId: string) => {
-    const selectedOption = options.find(opt => opt.class === energyClass)?.id || '';
-    updateAssessment(projectId, subCategoryId, energyClass, selectedOption);
-    navigate(`/projects/${projectId}/category/${subCategoryId.split('.')[0]}`);
+  const handleClassSelection = async (energyClass: 'A' | 'B' | 'C' | 'D' | 'NA', optionId: string) => {
+    try {
+      const selectedOption = options.find(opt => opt.id === optionId)?.id || '';
+      await updateAssessment(projectId, subCategoryId, energyClass, selectedOption);
+      navigate(`/projects/${projectId}/category/${subCategoryId.split('.')[0]}`);
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de l\'évaluation:', error);
+      // Vous pourriez ajouter une notification d'erreur ici
+    }
   };
 
   return (

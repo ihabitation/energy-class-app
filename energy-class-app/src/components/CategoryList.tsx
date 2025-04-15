@@ -12,15 +12,16 @@ import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import BlindsIcon from '@mui/icons-material/Blinds';
 import RouterIcon from '@mui/icons-material/Router';
 import { BuildingAssessment } from '../types/energyClass';
+import { useCategories } from '../contexts/CategoryContext';
 
 interface CategoryListProps {
-  categories: Category[];
-  onCategoryToggle: (categoryId: string) => void;
   assessment: BuildingAssessment;
   projectId: string;
 }
 
-const CategoryList: React.FC<CategoryListProps> = ({ categories, onCategoryToggle, assessment, projectId }) => {
+const CategoryList: React.FC<CategoryListProps> = ({ assessment, projectId }) => {
+  const { categories, toggleCategory } = useCategories();
+
   const getCategoryProgress = (categoryId: string) => {
     const subCategories = getSubCategories(categoryId);
     const completedSubCategories = subCategories.filter(subCat => {
@@ -92,7 +93,7 @@ const CategoryList: React.FC<CategoryListProps> = ({ categories, onCategoryToggl
               <Switch
                 edge="end"
                 checked={category.isEnabled}
-                onChange={() => onCategoryToggle(category.id)}
+                onChange={() => toggleCategory(category.id, projectId)}
               />
             }
             disablePadding
@@ -112,29 +113,24 @@ const CategoryList: React.FC<CategoryListProps> = ({ categories, onCategoryToggl
               <ListItemText
                 primary={
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="subtitle1">
+                    <Typography variant="subtitle1" component="div">
                       {category.name}
                     </Typography>
-                    <Chip
-                      size="small"
-                      label={`${progress.completed}/${progress.total}`}
-                      color={progress.completed === progress.total ? "success" : "default"}
-                    />
-                    {worstClass !== 'NA' && (
-                      <Chip
-                        size="small"
-                        label={`Classe ${worstClass}`}
-                        sx={{
-                          backgroundColor: getClassColor(worstClass),
-                          color: getClassTextColor(worstClass),
-                        }}
-                      />
+                    {category.isEnabled && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="caption" component="div" sx={{ color: 'text.secondary' }}>
+                          {progress.percentage}%
+                        </Typography>
+                        <Typography variant="caption" component="div" sx={{ color: 'text.secondary' }}>
+                          ({worstClass})
+                        </Typography>
+                      </Box>
                     )}
                   </Box>
                 }
                 secondary={
                   <Box>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary" component="div">
                       {category.description}
                     </Typography>
                     <Box sx={{ mt: 1 }}>
@@ -145,7 +141,11 @@ const CategoryList: React.FC<CategoryListProps> = ({ categories, onCategoryToggl
                         sx={{ height: 8, borderRadius: 4 }}
                       />
                     </Box>
-                    <Typography variant="caption" color={category.isEnabled ? 'success.main' : 'error.main'}>
+                    <Typography 
+                      variant="body2" 
+                      component="div"
+                      sx={{ color: category.isEnabled ? 'success.main' : 'error.main' }}
+                    >
                       {category.isEnabled ? 'Activée' : 'Désactivée'}
                     </Typography>
                   </Box>
