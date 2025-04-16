@@ -19,10 +19,10 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <ProjectProvider>
-        <CategoryProvider>
-          <AssessmentProvider>
-            <TechnicalSolutionProvider>
-              <Router>
+        <AssessmentProvider>
+          <Router future={{ v7_startTransition: true }}>
+            <CategoryProvider>
+              <TechnicalSolutionProvider>
                 <Routes>
                   <Route path="/" element={<ProjectList />} />
                   <Route path="/projects/new" element={<ProjectForm />} />
@@ -32,10 +32,10 @@ function App() {
                   <Route path="/projects/:projectId/category/:categoryId" element={<CategoryDetail />} />
                   <Route path="/projects/:projectId/category/:categoryId/subcategory/:subCategoryId" element={<SubCategoryDetail />} />
                 </Routes>
-              </Router>
-            </TechnicalSolutionProvider>
-          </AssessmentProvider>
-        </CategoryProvider>
+              </TechnicalSolutionProvider>
+            </CategoryProvider>
+          </Router>
+        </AssessmentProvider>
       </ProjectProvider>
     </ThemeProvider>
   );
