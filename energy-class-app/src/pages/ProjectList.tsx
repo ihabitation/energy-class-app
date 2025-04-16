@@ -57,8 +57,8 @@ const ProjectList: React.FC = () => {
       totalSubCategories += subCategories.length;
       
       completedSubCategories += subCategories.filter(subCat => {
-        const selectedClass = assessment[subCat.id]?.selectedClass;
-        return selectedClass !== undefined;
+        const classType = assessment[subCat.id]?.classType;
+        return classType !== undefined;
       }).length;
     });
 
@@ -145,8 +145,16 @@ const ProjectList: React.FC = () => {
       )}
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography variant="h4" component="h1">
-          Projets d'évaluation énergétique
+        <Typography 
+          variant="h5" 
+          component="h1"
+          sx={{
+            fontWeight: 600,
+            color: theme => theme.palette.text.primary,
+            letterSpacing: '0.5px'
+          }}
+        >
+          PROJETS D'ÉVALUATION ÉNERGÉTIQUE
         </Typography>
         <Box>
           <IconButton onClick={() => setShowFilters(!showFilters)} sx={{ mr: 1 }}>
@@ -215,23 +223,27 @@ const ProjectList: React.FC = () => {
                   p: 3,
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 2
+                  gap: 2,
+                  backgroundColor: getClassColor(getFinalClass(project.id)),
+                  color: getClassTextColor(getFinalClass(project.id))
                 }}
               >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Box>
                     <Typography variant="h6">{project.name}</Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
                       {project.clientName}
                     </Typography>
                   </Box>
                   <Chip
                     label={getFinalClass(project.id)}
                     sx={{
-                      bgcolor: getClassColor(getFinalClass(project.id)),
-                      color: getClassTextColor(getFinalClass(project.id)),
+                      bgcolor: 'rgba(255, 255, 255, 0.2)',
+                      color: 'inherit',
                       fontSize: '1.2rem',
-                      fontWeight: 'bold'
+                      fontWeight: 'bold',
+                      border: '2px solid',
+                      borderColor: 'rgba(255, 255, 255, 0.3)'
                     }}
                   />
                 </Box>
@@ -240,30 +252,65 @@ const ProjectList: React.FC = () => {
                   <LinearProgress
                     variant="determinate"
                     value={calculateProjectProgress(project.id)}
-                    sx={{ height: 8, borderRadius: 4 }}
+                    sx={{ 
+                      height: 8, 
+                      borderRadius: 4,
+                      backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                      '& .MuiLinearProgress-bar': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.3)'
+                      }
+                    }}
                   />
-                  <Typography variant="caption" sx={{ mt: 0.5, display: 'block' }}>
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      mt: 0.5, 
+                      display: 'block', 
+                      opacity: 0.9,
+                      fontWeight: calculateProjectProgress(project.id) === 100 ? 600 : 'inherit'
+                    }}
+                  >
                     Progression: {Math.round(calculateProjectProgress(project.id))}%
                   </Typography>
                 </Box>
 
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     onClick={() => navigate(`/projects/${project.id}/assessment`)}
+                    sx={{
+                      bgcolor: 'rgba(255, 255, 255, 0.2)',
+                      color: 'inherit',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.3)'
+                      }
+                    }}
                   >
                     Évaluer
                   </Button>
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     onClick={() => navigate(`/projects/${project.id}`)}
+                    sx={{
+                      bgcolor: 'rgba(255, 255, 255, 0.2)',
+                      color: 'inherit',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.3)'
+                      }
+                    }}
                   >
                     Détails
                   </Button>
                   <Button
-                    variant="outlined"
-                    color="error"
+                    variant="contained"
                     onClick={() => handleDeleteClick(project.id)}
+                    sx={{
+                      bgcolor: 'rgba(255, 255, 255, 0.2)',
+                      color: 'inherit',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.3)'
+                      }
+                    }}
                   >
                     Supprimer
                   </Button>
