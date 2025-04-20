@@ -90,8 +90,8 @@ const ProjectDetail: React.FC = () => {
   const completedSubCategories = enabledCategories.reduce((total, categoryId) => {
     const subCategories = getSubCategories(categoryId);
     return total + subCategories.filter(subCat => {
-      const selectedClass = assessment[subCat.id]?.selectedClass;
-      return selectedClass !== undefined;
+      const classType = assessment[subCat.id]?.classType;
+      return classType !== undefined;
     }).length;
   }, 0);
 

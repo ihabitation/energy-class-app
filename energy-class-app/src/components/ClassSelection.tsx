@@ -1,5 +1,5 @@
-import React from 'react';
-import { Grid, Typography, Box, Tooltip, Paper, Card, CardContent, CardActionArea, useTheme, useMediaQuery } from '@mui/material';
+import React, { useState } from 'react';
+import { Grid, Typography, Box, Tooltip, Paper, Card, CardContent, CardActionArea, useTheme, useMediaQuery, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import { SubCategory } from '../types/energyClass';
 import { getClassColor, getClassTextColor } from '../utils/colors';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -25,11 +25,17 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({
 }) => {
   const { getAssessment, updateAssessment } = useAssessment();
   const assessment = getAssessment(projectId);
-  const selectedClass = assessment[subCategoryId]?.selectedClass;
+  const classType = assessment[subCategoryId]?.classType;
   const selectedOption = assessment[subCategoryId]?.selectedOption;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
+
+  // État pour gérer le détail sur mobile
+  const [selectedDetail, setSelectedDetail] = useState<{
+    class: 'A' | 'B' | 'C' | 'D' | 'NA';
+    description: string;
+  } | null>(null);
 
   // Filtrer les classes disponibles en fonction des options de la sous-catégorie
   const availableClasses = ['NA', 'A', 'B', 'C', 'D'].filter(classType => {
@@ -68,113 +74,244 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({
     }
   };
 
+  const handleClassClick = (energyClass: 'A' | 'B' | 'C' | 'D' | 'NA') => {
+    if (isMobile) {
+      const description = getClassDescription(energyClass);
+      if (selectedDetail?.class === energyClass) {
+        // Si on clique une deuxième fois sur la même classe, on la sélectionne
+        handleClassSelection(energyClass, '');
+        setSelectedDetail(null);
+      } else {
+        // Premier clic : on affiche le détail
+        setSelectedDetail({
+          class: energyClass,
+          description: description.full
+        });
+      }
+    } else {
+      // Sur desktop, on sélectionne directement
+      handleClassSelection(energyClass, '');
+    }
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedDetail(null);
+  };
+
   return (
     <Box>
       <Paper 
         elevation={2} 
         sx={{ 
-          p: isMobile ? 2 : 3, 
-          mb: 3,
+          p: isMobile ? 1.5 : 3, 
+          mb: isMobile ? 2 : 3,
           position: 'sticky',
           top: 0,
           zIndex: 1,
           backgroundColor: 'background.paper'
         }}
       >
-        <Typography variant={isMobile ? "h6" : "h5"} gutterBottom>
+        <Typography 
+          variant={isMobile ? "h6" : "h5"} 
+          sx={{
+            fontWeight: 600,
+            color: theme => theme.palette.primary.main,
+            pb: 1,
+            borderBottom: '2px solid',
+            borderColor: theme => theme.palette.divider,
+            mb: 2,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}
+        >
           {options?.find(opt => opt.id === subCategoryId)?.name}
         </Typography>
-        <Typography variant="body1" paragraph>
+        <Typography 
+          variant="body1" 
+          paragraph
+          sx={{
+            display: isMobile ? '-webkit-box' : 'block',
+            WebkitLineClamp: isMobile ? 2 : 'none',
+            WebkitBoxOrient: 'vertical',
+            overflow: isMobile ? 'hidden' : 'visible',
+            mb: isMobile ? 1 : 2,
+            color: theme => theme.palette.text.secondary
+          }}
+        >
           {options?.find(opt => opt.id === subCategoryId)?.description}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {isMobile ? "Appuyez sur les classes pour plus de détails" : "Survolez les classes pour plus de détails"}
+        <Typography 
+          variant="body2" 
+          color="text.secondary"
+          sx={{ fontSize: isMobile ? '0.75rem' : 'inherit' }}
+        >
+          {isMobile ? "Appuyez une fois pour voir les détails, deux fois pour sélectionner" : "Survolez les classes pour plus de détails"}
         </Typography>
       </Paper>
 
-      <Grid container spacing={isMobile ? 1 : 2}>
+      <Grid container spacing={isMobile ? 1.5 : 2}>
         {availableClasses.map((energyClass) => {
           const description = getClassDescription(energyClass);
-          const isSelected = selectedClass === energyClass;
+          const isSelected = classType === energyClass;
+          const isDetailSelected = selectedDetail?.class === energyClass;
+          
+          const cardContent = (
+            <Box sx={{ 
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              <Box sx={{ 
+                position: 'relative',
+                pt: isMobile ? 1.5 : 2,
+                pb: isMobile ? 1 : 1,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                <Typography 
+                  variant={isMobile ? "h4" : "h2"}
+                  component="div" 
+                  align="center"
+                  sx={{
+                    fontWeight: 'bold',
+                    lineHeight: 1
+                  }}
+                >
+                  {energyClass}
+                </Typography>
+                {isSelected && (
+                  <CheckCircleIcon 
+                    sx={{ 
+                      fontSize: isMobile ? '1.25rem' : '2rem',
+                      color: theme => theme.palette.primary.main,
+                      position: 'absolute',
+                      top: isMobile ? 4 : 4,
+                      right: isMobile ? 4 : 4
+                    }} 
+                  />
+                )}
+              </Box>
+              <Box sx={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                p: isMobile ? 1 : 2,
+                pt: 0
+              }}>
+                <Typography 
+                  variant="body2"
+                  align="center"
+                  sx={{
+                    width: '100%',
+                    opacity: 0.9,
+                    fontSize: isMobile ? '0.75rem' : '0.875rem',
+                    display: isMobile ? 'block' : '-webkit-box',
+                    WebkitLineClamp: isMobile ? 'none' : 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: isMobile ? 'visible' : 'hidden',
+                    whiteSpace: isMobile ? 'normal' : 'pre-line'
+                  }}
+                >
+                  {description.short}
+                </Typography>
+              </Box>
+            </Box>
+          );
+          
           return (
-            <Grid item xs={6} sm={6} md={4} key={energyClass}>
-              <Tooltip
-                title={description.full}
-                placement={isMobile ? "bottom" : "top"}
-                arrow
-                enterDelay={isMobile ? 0 : 200}
-                leaveDelay={isMobile ? 0 : 200}
-                enterTouchDelay={0}
-              >
+            <Grid item xs={6} sm={4} md={2.4} key={energyClass}>
+              {!isMobile ? (
+                <Tooltip
+                  title={description.full}
+                  placement="top"
+                  arrow
+                  enterDelay={200}
+                  leaveDelay={200}
+                >
+                  <Card 
+                    sx={{ 
+                      height: '100%',
+                      minHeight: '140px',
+                      backgroundColor: getClassColor(energyClass),
+                      color: getClassTextColor(energyClass),
+                      transition: 'all 0.2s',
+                      position: 'relative',
+                      border: isSelected ? '2px solid' : 'none',
+                      borderColor: isSelected ? theme => theme.palette.primary.main : 'transparent',
+                      transform: isSelected ? 'scale(1.02)' : 'scale(1)',
+                      '&:hover': {
+                        transform: 'scale(1.02)',
+                        backgroundColor: getClassColor(energyClass),
+                        opacity: 0.9,
+                      }
+                    }}
+                  >
+                    <CardActionArea 
+                      onClick={() => handleClassClick(energyClass)}
+                      sx={{ height: '100%' }}
+                    >
+                      {cardContent}
+                    </CardActionArea>
+                  </Card>
+                </Tooltip>
+              ) : (
                 <Card 
                   sx={{ 
                     height: '100%',
+                    minHeight: '120px',
                     backgroundColor: getClassColor(energyClass),
                     color: getClassTextColor(energyClass),
                     transition: 'all 0.2s',
                     position: 'relative',
-                    border: isSelected ? '3px solid' : 'none',
-                    borderColor: isSelected ? theme => theme.palette.primary.main : 'transparent',
-                    transform: isSelected ? 'scale(1.02)' : 'scale(1)',
-                    '&:hover': {
-                      transform: 'scale(1.02)',
-                      backgroundColor: getClassColor(energyClass),
-                      opacity: 0.9,
-                    }
+                    border: isSelected || isDetailSelected ? '2px solid' : 'none',
+                    borderColor: theme => theme.palette.primary.main,
+                    transform: (isSelected || isDetailSelected) ? 'scale(1.02)' : 'scale(1)',
                   }}
                 >
                   <CardActionArea 
-                    onClick={() => handleClassSelection(energyClass, '')}
-                    sx={{ height: '100%', p: isMobile ? 1 : 2 }}
+                    onClick={() => handleClassClick(energyClass)}
+                    sx={{ height: '100%' }}
                   >
-                    <CardContent sx={{ p: isMobile ? 1 : 2 }}>
-                      <Box sx={{ 
-                        display: 'flex', 
-                        justifyContent: 'center', 
-                        alignItems: 'center', 
-                        gap: 1,
-                        position: 'relative'
-                      }}>
-                        <Typography 
-                          variant={isMobile ? "h4" : "h3"} 
-                          component="div" 
-                          gutterBottom={!isMobile} 
-                          align="center"
-                        >
-                          {energyClass}
-                        </Typography>
-                        {isSelected && (
-                          <CheckCircleIcon 
-                            sx={{ 
-                              fontSize: isMobile ? '1.5rem' : '2rem',
-                              color: theme => theme.palette.primary.main,
-                              position: 'absolute',
-                              top: isMobile ? 4 : 8,
-                              right: isMobile ? 4 : 8
-                            }} 
-                          />
-                        )}
-                      </Box>
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
-                          fontSize: isMobile ? '0.75rem' : 'inherit',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden'
-                        }}
-                      >
-                        {description.short}
-                      </Typography>
-                    </CardContent>
+                    {cardContent}
                   </CardActionArea>
                 </Card>
-              </Tooltip>
+              )}
             </Grid>
           );
         })}
       </Grid>
+
+      {/* Dialog pour afficher les détails sur mobile */}
+      <Dialog
+        open={!!selectedDetail}
+        onClose={handleCloseDetail}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>
+          Classe {selectedDetail?.class}
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            {selectedDetail?.description}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDetail}>Fermer</Button>
+          <Button 
+            onClick={() => {
+              if (selectedDetail) {
+                handleClassSelection(selectedDetail.class, '');
+              }
+              handleCloseDetail();
+            }}
+            variant="contained"
+          >
+            Sélectionner
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

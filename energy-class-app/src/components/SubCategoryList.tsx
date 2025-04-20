@@ -18,7 +18,7 @@ const SubCategoryList: React.FC<SubCategoryListProps> = ({ categoryId, projectId
   return (
     <Grid container spacing={3}>
       {subCategories.map((subCategory) => {
-        const selectedClass = assessment[subCategory.id]?.selectedClass;
+        const classType = assessment[subCategory.id]?.classType;
         const selectedOption = assessment[subCategory.id]?.selectedOption;
 
         return (
@@ -46,10 +46,27 @@ const SubCategoryList: React.FC<SubCategoryListProps> = ({ categoryId, projectId
                 }}
               >
                 <Box sx={{ width: '100%', mb: 2 }}>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography 
+                    variant="h6" 
+                    gutterBottom
+                    sx={{
+                      fontWeight: 500,
+                      fontSize: '1.25rem',
+                      color: 'primary.main',
+                      mb: 1.5
+                    }}
+                  >
                     {subCategory.name}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary" 
+                    sx={{ 
+                      mb: 2,
+                      opacity: 0.8,
+                      lineHeight: 1.4
+                    }}
+                  >
                     {subCategory.description}
                   </Typography>
                 </Box>
@@ -61,13 +78,13 @@ const SubCategoryList: React.FC<SubCategoryListProps> = ({ categoryId, projectId
                   justifyContent: 'space-between',
                   alignItems: 'center'
                 }}>
-                  {selectedClass ? (
+                  {classType ? (
                     <Chip
-                      label={selectedClass}
+                      label={classType}
                       size="small"
                       sx={{
-                        backgroundColor: getClassColor(selectedClass),
-                        color: getClassTextColor(selectedClass),
+                        backgroundColor: getClassColor(classType),
+                        color: getClassTextColor(classType),
                       }}
                     />
                   ) : (

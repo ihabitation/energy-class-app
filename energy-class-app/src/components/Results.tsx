@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Typography, Box, Button, Paper, List, ListItem, ListItemText, Divider } from '@mui/material';
+import { Typography, Box, Button, Paper, List, ListItem, ListItemText, Divider, useTheme, useMediaQuery } from '@mui/material';
 import { BuildingAssessment } from '../types/energyClass';
 
 interface ResultsProps {
@@ -11,6 +11,8 @@ interface ResultsProps {
 
 const Results: React.FC<ResultsProps> = ({ assessment, finalClass, enabledCategories }) => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const getClassColor = (classType: 'A' | 'B' | 'C' | 'D' | 'NA') => {
     switch (classType) {
@@ -31,56 +33,90 @@ const Results: React.FC<ResultsProps> = ({ assessment, finalClass, enabledCatego
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom align="center">
+      <Typography 
+        variant={isMobile ? "h5" : "h4"} 
+        gutterBottom 
+        align="center"
+        sx={{ mb: isMobile ? 2 : 3 }}
+      >
         Résultats de l'évaluation
       </Typography>
 
-      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h5" gutterBottom>
+      <Paper 
+        elevation={3} 
+        sx={{ 
+          p: isMobile ? 2 : 3, 
+          mb: isMobile ? 3 : 4 
+        }}
+      >
+        <Typography 
+          variant={isMobile ? "h6" : "h5"} 
+          gutterBottom
+        >
           Classe énergétique finale
         </Typography>
         <Typography
-          variant="h2"
+          variant={isMobile ? "h3" : "h2"}
           align="center"
           sx={{
             color: getClassColor(finalClass),
             fontWeight: 'bold',
-            my: 4
+            my: isMobile ? 2 : 4
           }}
         >
           {finalClass}
         </Typography>
-        <Typography variant="body1" paragraph>
+        <Typography 
+          variant="body1" 
+          paragraph
+          sx={{
+            fontSize: isMobile ? '0.875rem' : '1rem'
+          }}
+        >
           Selon la norme EN ISO 52120-1, la classe énergétique finale est déterminée par la classe la plus basse parmi les catégories activées. La classe D représente le niveau le plus bas (le moins performant), tandis que la classe A représente le niveau le plus élevé (le plus performant).
         </Typography>
       </Paper>
 
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <Typography variant="h5" gutterBottom>
-          Détail des évaluations
+      <Paper elevation={3} sx={{ p: isMobile ? 2 : 3 }}>
+        <Typography 
+          variant={isMobile ? "h6" : "h5"} 
+          gutterBottom
+        >
+          Détails par catégorie
         </Typography>
         <List>
-          {Object.entries(assessment).map(([subCategoryId, { selectedClass, selectedOption }]) => {
-            const categoryId = subCategoryId.split('.')[0];
-            if (!enabledCategories.includes(categoryId)) return null;
-
+          {Object.entries(assessment).map(([subCategoryId, { classType, selectedOption }]) => {
+            if (!enabledCategories.includes(subCategoryId.split('.')[0])) return null;
             return (
               <React.Fragment key={subCategoryId}>
                 <ListItem>
                   <ListItemText
-                    primary={subCategoryId}
+                    primary={
+                      <Typography 
+                        variant={isMobile ? "body1" : "subtitle1"}
+                        sx={{ fontWeight: 'medium' }}
+                      >
+                        {subCategoryId}
+                      </Typography>
+                    }
                     secondary={
-                      <Box>
-                        <Typography
-                          variant="body2"
-                          color={getClassColor(selectedClass)}
-                          component="span"
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                        <Typography 
+                          variant="body2" 
+                          color="text.secondary"
+                          sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}
                         >
-                          Classe : {selectedClass}
+                          Classe : {classType}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Option sélectionnée : {selectedOption}
-                        </Typography>
+                        {selectedOption && (
+                          <Typography 
+                            variant="body2" 
+                            color="text.secondary"
+                            sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}
+                          >
+                            Option : {selectedOption}
+                          </Typography>
+                        )}
                       </Box>
                     }
                   />

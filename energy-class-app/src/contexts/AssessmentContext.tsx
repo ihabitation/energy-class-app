@@ -2,11 +2,12 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { BuildingAssessment } from '../types/energyClass';
 import { supabase } from '../lib/supabase';
 import { calculateFinalClass } from '../services/energyClassService';
+import { getCategories } from '../services/energyClassService';
 
 interface AssessmentContextType {
   getAssessment: (projectId: string) => BuildingAssessment;
-  updateAssessment: (projectId: string, subCategoryId: string, selectedClass: 'A' | 'B' | 'C' | 'D' | 'NA', selectedOption: string) => Promise<void>;
-  updateGlobalResults: (projectId: string, assessment: BuildingAssessment, enabledCategories: string[]) => Promise<void>;
+  updateAssessment: (projectId: string, subCategoryId: string, classType: 'A' | 'B' | 'C' | 'D' | 'NA', selectedOption: string) => Promise<void>;
+  updateGlobalResults: (projectId: string, enabledCategories: string[]) => Promise<void>;
 }
 
 const AssessmentContext = createContext<AssessmentContextType | undefined>(undefined);
@@ -18,24 +19,47 @@ export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return assessments[projectId] || {};
   };
 
-  const updateGlobalResults = async (projectId: string, assessment: BuildingAssessment, enabledCategories: string[]) => {
-    const finalClass = calculateFinalClass(assessment, enabledCategories);
-    
-    const { error } = await supabase
-      .from('global_results')
-      .upsert(
-        {
-          project_id: projectId,
-          final_class: finalClass,
-          enabled_categories: enabledCategories,
-          last_updated: new Date().toISOString()
-        },
-        {
-          onConflict: 'project_id'
-        }
-      );
+  const updateGlobalResults = async (projectId: string, enabledCategories: string[]) => {
+    try {
+      console.log('Mise à jour des résultats globaux pour le projet:', projectId);
+      console.log('Catégories activées:', enabledCategories);
 
-    if (error) {
+      // Récupérer l'assessment actuel
+      const assessment = getAssessment(projectId);
+      const finalClass = calculateFinalClass(assessment, enabledCategories);
+      console.log('Nouvelle classe finale calculée:', finalClass);
+
+      // Supprimer les anciennes entrées pour ce projet
+      const { error: deleteError } = await supabase
+        .from('global_results')
+        .delete()
+        .eq('project_id', projectId);
+
+      if (deleteError) {
+        console.error('Erreur lors de la suppression des anciennes entrées:', deleteError);
+        return;
+      }
+
+      // Créer les nouvelles entrées
+      const allCategories = getCategories();
+      const entries = allCategories.map(category => ({
+        project_id: projectId,
+        category_id: category.id,
+        is_enabled: enabledCategories.includes(category.id),
+        last_updated: new Date().toISOString()
+      }));
+
+      const { error: insertError } = await supabase
+        .from('global_results')
+        .insert(entries);
+
+      if (insertError) {
+        console.error('Erreur lors de la création des nouvelles entrées:', insertError);
+        return;
+      }
+
+      console.log('Résultats globaux mis à jour avec succès');
+    } catch (error) {
       console.error('Erreur lors de la mise à jour des résultats globaux:', error);
     }
   };
@@ -43,7 +67,7 @@ export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const updateAssessment = async (
     projectId: string,
     subCategoryId: string,
-    selectedClass: 'A' | 'B' | 'C' | 'D' | 'NA',
+    classType: 'A' | 'B' | 'C' | 'D' | 'NA',
     selectedOption: string
   ) => {
     try {
@@ -55,7 +79,7 @@ export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         projectId,
         categoryId,
         subCategory,
-        selectedClass,
+        classType,
         selectedOption
       });
 
@@ -66,7 +90,7 @@ export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           project_id: projectId,
           category_id: categoryId,
           sub_category_id: subCategory,
-          selected_class: selectedClass,
+          selected_class: classType,
           selected_option: selectedOption,
           last_updated: new Date().toISOString()
         });
@@ -80,7 +104,7 @@ export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const updatedAssessment = {
         ...assessments[projectId],
         [subCategoryId]: {
-          selectedClass,
+          classType,
           selectedOption
         }
       };
@@ -89,42 +113,22 @@ export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         [projectId]: updatedAssessment
       }));
 
-      // Récupérer les catégories activées pour mettre à jour les résultats globaux
-      const { data: globalResult, error: globalError } = await supabase
+      // Récupérer les catégories activées
+      const { data: globalResults, error: globalError } = await supabase
         .from('global_results')
-        .select('*')
-        .eq('project_id', projectId)
-        .order('last_updated', { ascending: false })
-        .limit(1)
-        .single();
+        .select('category_id, is_enabled')
+        .eq('project_id', projectId);
 
       if (globalError) {
         console.error('Erreur lors de la récupération des résultats globaux:', globalError);
-        // Créer un nouvel enregistrement si aucun n'existe
-        const { error: insertError } = await supabase
-          .from('global_results')
-          .upsert(
-            {
-              project_id: projectId,
-              enabled_categories: [],
-              disabled_categories: [],
-              final_class: 'NA',
-              last_updated: new Date().toISOString()
-            },
-            {
-              onConflict: 'project_id'
-            }
-          );
-
-        if (insertError) {
-          console.error('Erreur lors de la création des résultats globaux:', insertError);
-          return;
-        }
+        return;
       }
 
-      if (globalResult?.enabled_categories) {
-        await updateGlobalResults(projectId, updatedAssessment, globalResult.enabled_categories);
-      }
+      const enabledCategories = globalResults
+        ?.filter(result => result.is_enabled)
+        .map(result => result.category_id) || [];
+
+      await updateGlobalResults(projectId, enabledCategories);
     } catch (error) {
       console.error('Erreur dans updateAssessment:', error);
       throw error;
@@ -155,7 +159,7 @@ export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         }
 
         loadedAssessments[projectId][subCategoryId] = {
-          selectedClass: assessment.selected_class,
+          classType: assessment.selected_class,
           selectedOption: assessment.selected_option
         };
       });
@@ -164,24 +168,36 @@ export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       // Initialiser les global_results pour tous les projets
       const projectIds = Array.from(new Set(assessmentsData.map(a => a.project_id)));
-      for (const projectId of projectIds) {
-        const { error: globalError } = await supabase
-          .from('global_results')
-          .upsert(
-            {
-              project_id: projectId,
-              enabled_categories: [], // Toutes les catégories sont activées par défaut
-              disabled_categories: [],
-              final_class: 'NA',
-              last_updated: new Date().toISOString()
-            },
-            {
-              onConflict: 'project_id'
-            }
-          );
+      const allCategories = getCategories();
 
-        if (globalError) {
-          console.error(`Erreur lors de l'initialisation des global_results pour le projet ${projectId}:`, globalError);
+      for (const projectId of projectIds) {
+        // Vérifier si des entrées existent déjà pour ce projet
+        const { data: existingResults, error: checkError } = await supabase
+          .from('global_results')
+          .select('category_id')
+          .eq('project_id', projectId);
+
+        if (checkError) {
+          console.error(`Erreur lors de la vérification des résultats pour le projet ${projectId}:`, checkError);
+          continue;
+        }
+
+        // Si aucune entrée n'existe, créer les entrées par défaut
+        if (!existingResults || existingResults.length === 0) {
+          const defaultEntries = allCategories.map(category => ({
+            project_id: projectId,
+            category_id: category.id,
+            is_enabled: true,
+            last_updated: new Date().toISOString()
+          }));
+
+          const { error: insertError } = await supabase
+            .from('global_results')
+            .insert(defaultEntries);
+
+          if (insertError) {
+            console.error(`Erreur lors de l'initialisation des résultats pour le projet ${projectId}:`, insertError);
+          }
         }
       }
     };

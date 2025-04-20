@@ -52,7 +52,7 @@ export interface ClassOption {
 
 export interface BuildingAssessment {
   [key: string]: {
-    selectedClass: 'A' | 'B' | 'C' | 'D' | 'NA';
+    classType: 'A' | 'B' | 'C' | 'D' | 'NA';
     selectedOption: string;
   };
 } 

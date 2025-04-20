@@ -129,10 +129,10 @@ export const calculateFinalClass = (assessment: BuildingAssessment, enabledCateg
   };
 
   // Compter le nombre d'occurrences de chaque classe pour les catégories activées
-  Object.entries(assessment).forEach(([subCategoryId, { selectedClass }]) => {
+  Object.entries(assessment).forEach(([subCategoryId, { classType }]) => {
     const categoryId = subCategoryId.split('.')[0];
-    if (enabledCategories.includes(categoryId) && selectedClass && selectedClass !== 'NA') {
-      classCounts[selectedClass]++;
+    if (enabledCategories.includes(categoryId) && classType && classType !== 'NA') {
+      classCounts[classType]++;
     }
   });
 

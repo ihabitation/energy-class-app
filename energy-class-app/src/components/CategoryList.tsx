@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { List, ListItem, ListItemText, ListItemButton, Switch, Typography, Box, LinearProgress, Chip } from '@mui/material';
+import { List, ListItem, ListItemText, ListItemButton, Typography, Box, LinearProgress, Button, useTheme, useMediaQuery } from '@mui/material';
 import { Category } from '../types/energyClass';
 import { getSubCategories } from '../services/energyClassService';
 import { getClassColor, getClassTextColor } from '../utils/colors';
@@ -13,6 +13,8 @@ import BlindsIcon from '@mui/icons-material/Blinds';
 import RouterIcon from '@mui/icons-material/Router';
 import { BuildingAssessment } from '../types/energyClass';
 import { useCategories } from '../contexts/CategoryContext';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import PowerIcon from '@mui/icons-material/Power';
 
 interface CategoryListProps {
   assessment: BuildingAssessment;
@@ -20,13 +22,32 @@ interface CategoryListProps {
 }
 
 const CategoryList: React.FC<CategoryListProps> = ({ assessment, projectId }) => {
-  const { categories, toggleCategory } = useCategories();
+  const { categories, toggleCategory, isLoading } = useCategories();
+  const [localCategories, setLocalCategories] = React.useState(categories);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  React.useEffect(() => {
+    console.log('Mise à jour des catégories locales:', categories.map(c => ({
+      id: c.id,
+      isEnabled: c.isEnabled
+    })));
+    setLocalCategories(categories);
+  }, [categories]);
+
+  if (isLoading) {
+    return (
+      <Box sx={{ width: '100%', mt: 2 }}>
+        <LinearProgress />
+      </Box>
+    );
+  }
 
   const getCategoryProgress = (categoryId: string) => {
     const subCategories = getSubCategories(categoryId);
     const completedSubCategories = subCategories.filter(subCat => {
-      const selectedClass = assessment[subCat.id]?.selectedClass;
-      return selectedClass !== undefined;
+      const classType = assessment[subCat.id]?.classType;
+      return classType !== undefined;
     }).length;
     const totalSubCategories = subCategories.length;
     return {
@@ -39,7 +60,7 @@ const CategoryList: React.FC<CategoryListProps> = ({ assessment, projectId }) =>
   const getWorstClassInCategory = (categoryId: string): 'A' | 'B' | 'C' | 'D' | 'NA' => {
     const subCategories = getSubCategories(categoryId);
     const classes = subCategories
-      .map(subCat => assessment[subCat.id]?.selectedClass)
+      .map(subCat => assessment[subCat.id]?.classType)
       .filter((classType): classType is 'A' | 'B' | 'C' | 'D' => 
         classType !== undefined && ['A', 'B', 'C', 'D'].includes(classType)
       );
@@ -81,22 +102,57 @@ const CategoryList: React.FC<CategoryListProps> = ({ assessment, projectId }) =>
     }
   };
 
+  const handleToggle = async (categoryId: string) => {
+    try {
+      console.log('Toggle de la catégorie:', categoryId);
+      const category = localCategories.find(c => c.id === categoryId);
+      console.log('État actuel:', category?.isEnabled);
+      
+      // Mise à jour locale immédiate
+      setLocalCategories(prev => prev.map(cat => 
+        cat.id === categoryId ? { ...cat, isEnabled: !cat.isEnabled } : cat
+      ));
+      
+      await toggleCategory(categoryId, projectId);
+    } catch (error) {
+      console.error('Erreur lors du toggle de la catégorie:', error);
+      // En cas d'erreur, on revient à l'état précédent
+      setLocalCategories(categories);
+    }
+  };
+
   return (
     <List>
-      {categories.map((category) => {
+      {localCategories.map((category) => {
         const progress = getCategoryProgress(category.id);
         const worstClass = getWorstClassInCategory(category.id);
         return (
           <ListItem
             key={category.id}
             secondaryAction={
-              <Switch
-                edge="end"
-                checked={category.isEnabled}
-                onChange={() => toggleCategory(category.id, projectId)}
-              />
+              <Button
+                variant="contained"
+                onClick={() => handleToggle(category.id)}
+                sx={{
+                  minWidth: isMobile ? '90px' : '120px',
+                  fontSize: isMobile ? '0.75rem' : '0.875rem',
+                  backgroundColor: category.isEnabled ? 'success.main' : 'error.main',
+                  '&:hover': {
+                    backgroundColor: category.isEnabled ? 'success.dark' : 'error.dark',
+                  },
+                  position: 'absolute',
+                  right: isMobile ? 1 : 2,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  zIndex: 1
+                }}
+                startIcon={category.isEnabled ? <PowerIcon sx={{ fontSize: isMobile ? '1rem' : '1.25rem' }} /> : <PowerSettingsNewIcon sx={{ fontSize: isMobile ? '1rem' : '1.25rem' }} />}
+              >
+                {category.isEnabled ? 'Activée' : 'Désactivée'}
+              </Button>
             }
             disablePadding
+            sx={{ position: 'relative', pr: isMobile ? 8 : 10 }}
           >
             <ListItemButton
               component={Link}
@@ -106,51 +162,61 @@ const CategoryList: React.FC<CategoryListProps> = ({ assessment, projectId }) =>
                 backgroundColor: category.isEnabled ? 'transparent' : '#f5f5f5',
                 '&:hover': {
                   backgroundColor: category.isEnabled ? 'rgba(0, 0, 0, 0.04)' : '#f5f5f5',
-                }
+                },
+                width: '100%',
+                pr: isMobile ? 8 : 10
               }}
             >
               {getIcon(category.id)}
-              <ListItemText
-                primary={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="subtitle1" component="div">
-                      {category.name}
-                    </Typography>
-                    {category.isEnabled && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Typography variant="caption" component="div" sx={{ color: 'text.secondary' }}>
-                          {progress.percentage}%
-                        </Typography>
-                        <Typography variant="caption" component="div" sx={{ color: 'text.secondary' }}>
-                          ({worstClass})
-                        </Typography>
-                      </Box>
-                    )}
-                  </Box>
-                }
-                secondary={
-                  <Box>
-                    <Typography variant="body2" color="text.secondary" component="div">
-                      {category.description}
-                    </Typography>
-                    <Box sx={{ mt: 1 }}>
-                      <LinearProgress
-                        variant="determinate"
-                        value={progress.percentage}
-                        color={progress.percentage === 100 ? "success" : "primary"}
-                        sx={{ height: 8, borderRadius: 4 }}
-                      />
+              <Box sx={{ 
+                flex: 1, 
+                ml: isMobile ? 1 : 2,
+                maxWidth: 'calc(100% - 120px)'
+              }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 1, 
+                  flexWrap: 'wrap',
+                  mb: 0.5
+                }}>
+                  <Typography variant={isMobile ? "body1" : "subtitle1"}>
+                    {category.name}
+                  </Typography>
+                  {category.isEnabled && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        {progress.percentage}%
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        ({worstClass})
+                      </Typography>
                     </Box>
-                    <Typography 
-                      variant="body2" 
-                      component="div"
-                      sx={{ color: category.isEnabled ? 'success.main' : 'error.main' }}
-                    >
-                      {category.isEnabled ? 'Activée' : 'Désactivée'}
-                    </Typography>
-                  </Box>
-                }
-              />
+                  )}
+                </Box>
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary" 
+                  sx={{ 
+                    fontSize: isMobile ? '0.75rem' : '0.875rem',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    pr: 1
+                  }}
+                >
+                  {category.description}
+                </Typography>
+                <Box sx={{ mt: 1 }}>
+                  <LinearProgress
+                    variant="determinate"
+                    value={progress.percentage}
+                    color={progress.percentage === 100 ? "success" : "primary"}
+                    sx={{ height: isMobile ? 6 : 8, borderRadius: 4 }}
+                  />
+                </Box>
+              </Box>
             </ListItemButton>
           </ListItem>
         );

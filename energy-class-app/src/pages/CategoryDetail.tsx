@@ -1,58 +1,81 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Box, Button, Paper } from '@mui/material';
+import { Box, Typography, Paper, Button, useTheme, useMediaQuery, Container } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useProjects } from '../contexts/ProjectContext';
+import { useCategories } from '../contexts/CategoryContext';
 import SubCategoryList from '../components/SubCategoryList';
-import { useAssessment } from '../contexts/AssessmentContext';
-import { getSubCategories } from '../services/energyClassService';
+import { getCategories, getSubCategories } from '../services/energyClassService';
+import { Project } from '../types/project';
 import { getClassColor, getClassTextColor } from '../utils/colors';
+import { useAssessment } from '../contexts/AssessmentContext';
 
 const CategoryDetail: React.FC = () => {
   const { projectId, categoryId } = useParams<{ projectId: string; categoryId: string }>();
   const navigate = useNavigate();
+  const { projects } = useProjects();
+  const { categories } = useCategories();
   const { getAssessment } = useAssessment();
-  const assessment = projectId ? getAssessment(projectId) : {};
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   if (!projectId || !categoryId) {
     return (
       <Container>
-        <Typography color="error">Paramètres manquants</Typography>
+        <Typography variant="h5">ID de projet ou de catégorie manquant</Typography>
       </Container>
     );
   }
 
+  const project = projects.find(p => p.id === projectId) as Project | undefined;
+  const category = getCategories().find(c => c.id === categoryId);
+  const assessment = projectId ? getAssessment(projectId) : {};
+
   // Calculer la classe finale de la catégorie
   const calculateCategoryClass = () => {
+    if (!categoryId) return 'NA';
+    
     const subCategories = getSubCategories(categoryId);
-    const classes = subCategories
-      .map(subCat => assessment[subCat.id]?.selectedClass)
-      .filter((classType): classType is 'A' | 'B' | 'C' | 'D' => 
-        classType !== undefined && ['A', 'B', 'C', 'D'].includes(classType)
-      );
+    const subCategoryClasses = subCategories.map(sub => assessment[sub.id]?.classType || 'NA');
     
-    if (classes.length === 0) return 'NA';
+    // Si toutes les sous-catégories sont NA, retourner NA
+    if (subCategoryClasses.every(cls => cls === 'NA')) return 'NA';
     
-    const classValues = { 'A': 1, 'B': 2, 'C': 3, 'D': 4 };
-    return classes.reduce((worst, current) => 
-      classValues[current] > classValues[worst] ? current : worst
-    );
+    // Filtrer les NA et trouver la pire classe
+    const validClasses = subCategoryClasses.filter(cls => cls !== 'NA');
+    if (validClasses.length === 0) return 'NA';
+    
+    const classOrder = ['A', 'B', 'C', 'D'];
+    return validClasses.reduce((worst, current) => {
+      const worstIndex = classOrder.indexOf(worst);
+      const currentIndex = classOrder.indexOf(current);
+      return currentIndex > worstIndex ? current : worst;
+    }, 'A');
   };
 
   const categoryClass = calculateCategoryClass();
-  const subCategories = getSubCategories(categoryId);
-  const completedCount = subCategories.filter(subCat => {
-    const selectedClass = assessment[subCat.id]?.selectedClass;
-    return selectedClass !== undefined;
-  }).length;
+
+  if (!project || !category) {
+    return (
+      <Container>
+        <Typography variant="h5">Projet ou catégorie non trouvé</Typography>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Button
         startIcon={<ArrowBackIcon />}
         onClick={() => navigate(`/projects/${projectId}/assessment`)}
-        sx={{ mb: 3 }}
+        sx={{ 
+          mb: 4,
+          color: 'primary.main',
+          textTransform: 'none',
+          fontSize: '1rem'
+        }}
       >
-        Retour à l'évaluation
+        RETOUR À L'ÉVALUATION
       </Button>
 
       <Paper 
@@ -60,33 +83,53 @@ const CategoryDetail: React.FC = () => {
         sx={{ 
           p: 3, 
           mb: 4,
-          backgroundColor: categoryClass !== 'NA' ? getClassColor(categoryClass) : 'background.paper',
-          color: categoryClass !== 'NA' ? getClassTextColor(categoryClass) : 'text.primary'
+          backgroundColor: getClassColor(categoryClass),
+          color: getClassTextColor(categoryClass)
         }}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <Box>
-            <Typography variant="h4" component="h1" gutterBottom>
-              {categoryId.charAt(0).toUpperCase() + categoryId.slice(1)}
+            <Typography 
+              variant="h4" 
+              component="h1" 
+              gutterBottom
+              sx={{
+                fontSize: { xs: '1.75rem', sm: '2rem' },
+                fontWeight: 'normal',
+                color: 'inherit'
+              }}
+            >
+              {project.name}
             </Typography>
-            <Typography variant="subtitle1">
-              {completedCount} sur {subCategories.length} sous-catégories évaluées
+            <Typography 
+              variant="h5"
+              sx={{
+                fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                fontWeight: 'medium',
+                opacity: 0.9,
+                color: 'inherit'
+              }}
+            >
+              {category.name}
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h3" component="div" sx={{ fontWeight: 'bold' }}>
+            <Typography 
+              variant="h2" 
+              component="div" 
+              sx={{ 
+                fontWeight: 'bold',
+                fontSize: { xs: '2.5rem', sm: '3rem' }
+              }}
+            >
               {categoryClass}
             </Typography>
             <Typography variant="subtitle2">
-              Classe finale
+              Classe catégorie
             </Typography>
           </Box>
         </Box>
       </Paper>
-
-      <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-        Sous-catégories
-      </Typography>
 
       <SubCategoryList categoryId={categoryId} projectId={projectId} />
     </Container>
