@@ -208,6 +208,11 @@ const ProjectList: React.FC = () => {
     }
   };
 
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setProjectToDelete(null);
+  };
+
   const statusOptions: ProjectStatus[] = ['draft', 'in_progress', 'completed'];
   const statusLabels: Record<ProjectStatus, string> = {
     draft: 'Brouillon',
@@ -217,6 +222,10 @@ const ProjectList: React.FC = () => {
 
   const renderCategoryIcons = (projectId: string) => {
     try {
+      if (!projectId || !categories || !navigate) {
+        return null;
+      }
+
       const enabledCategoryIds = projectCategories[projectId] || [];
       const enabledCategories = categories.filter(cat => enabledCategoryIds.includes(cat.id));
       const currentClass = projectClasses[projectId] || 'NA';
@@ -225,6 +234,14 @@ const ProjectList: React.FC = () => {
       if (enabledCategories.length === 0) {
         return null;
       }
+
+      const handleCategoryClick = (categoryId: string) => {
+        try {
+          navigate(`/projects/${projectId}/category/${categoryId}`);
+        } catch (error) {
+          console.error('Erreur lors de la navigation:', error);
+        }
+      };
 
       return (
         <Box 
@@ -243,16 +260,22 @@ const ProjectList: React.FC = () => {
             return (
               <Tooltip 
                 key={category.id} 
-                title={category.name}
+                title={`Aller à ${category.name}`}
                 placement="top"
               >
                 <Box
+                  onClick={() => handleCategoryClick(category.id)}
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     width: { xs: '40px', sm: '32px' },
-                    height: { xs: '40px', sm: '32px' }
+                    height: { xs: '40px', sm: '32px' },
+                    cursor: 'pointer',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                      borderRadius: '4px'
+                    }
                   }}
                 >
                   <Icon sx={{ 
@@ -288,7 +311,13 @@ const ProjectList: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container 
+      maxWidth="lg" 
+      sx={{ 
+        py: 4,
+        px: { xs: 2, sm: 3 }  // Ajustement du padding horizontal du conteneur principal
+      }}
+    >
       {currentProject && (
         <Paper 
           elevation={3} 
@@ -321,26 +350,96 @@ const ProjectList: React.FC = () => {
         </Paper>
       )}
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography 
-          variant="h5" 
-          component="h1"
-          sx={{
-            fontWeight: 600,
-            color: theme => theme.palette.text.primary,
-            letterSpacing: '0.5px'
-          }}
-        >
-          VOS PROJETS D'AUDIT
-        </Typography>
-        <Box>
-          <IconButton onClick={() => setShowFilters(!showFilters)} sx={{ mr: 1 }}>
-            <FilterListIcon />
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'stretch', sm: 'center' }, 
+        mb: { xs: 3, sm: 4 },
+        gap: { xs: 3, sm: 0 },
+        width: '100%'
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: { xs: 'center', sm: 'flex-start' },
+          gap: { xs: 2, sm: 1 }
+        }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: { xs: 3, sm: 2 },
+            mb: { xs: 0, sm: 0 }
+          }}>
+            <img 
+              src="/logo.png" 
+              alt="iHabitation Logo" 
+              style={{ 
+                width: '48px', 
+                height: '48px',
+                objectFit: 'contain'
+              }} 
+            />
+            <Typography 
+              variant="h5" 
+              component="h1"
+              sx={{
+                fontWeight: 600,
+                color: theme => theme.palette.text.primary,
+                letterSpacing: '0.5px',
+                textAlign: { xs: 'center', sm: 'left' },
+                fontSize: { xs: '1.5rem', sm: '1.5rem' }
+              }}
+            >
+              VOS PROJETS D'AUDIT
+            </Typography>
+          </Box>
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{ 
+              textAlign: { xs: 'center', sm: 'left' },
+              maxWidth: '600px',
+              px: { xs: 2, sm: 0 },
+              fontSize: { xs: '0.9rem', sm: '0.875rem' }
+            }}
+          >
+            Gérez et suivez vos projets d'audit énergétique en un coup d'œil
+          </Typography>
+        </Box>
+
+        <Box sx={{ 
+          display: 'flex', 
+          gap: { xs: 2, sm: 2 },
+          justifyContent: { xs: 'center', sm: 'flex-end' },
+          width: '100%',
+          mt: { xs: 1, sm: 0 }
+        }}>
+          <IconButton 
+            onClick={() => setShowFilters(!showFilters)} 
+            sx={{ 
+              width: { xs: '48px', sm: '40px' },
+              height: { xs: '48px', sm: '40px' },
+              backgroundColor: theme => showFilters ? theme.palette.primary.main : 'transparent',
+              color: theme => showFilters ? theme.palette.primary.contrastText : theme.palette.primary.main,
+              '&:hover': {
+                backgroundColor: theme => showFilters ? theme.palette.primary.dark : theme.palette.action.hover
+              },
+              flexShrink: 0  // Empêche l'icône de rétrécir
+            }}
+          >
+            <FilterListIcon sx={{ fontSize: { xs: '1.5rem', sm: '1.25rem' } }} />
           </IconButton>
           <Button
             variant="contained"
-            startIcon={<AddIcon />}
+            startIcon={<AddIcon sx={{ fontSize: { xs: '1.5rem', sm: '1.25rem' } }} />}
             onClick={() => navigate('/projects/new')}
+            sx={{
+              width: '100%',  // Utilise toute la largeur disponible
+              maxWidth: { xs: 'calc(100% - 64px)', sm: 'auto' },  // Soustrait la largeur du bouton filtre + gap
+              height: { xs: '48px', sm: '40px' },
+              fontSize: { xs: '1rem', sm: '0.875rem' }
+            }}
           >
             Nouveau Projet
           </Button>
@@ -348,7 +447,14 @@ const ProjectList: React.FC = () => {
       </Box>
 
       {showFilters && (
-        <Card sx={{ mb: 4 }}>
+        <Card 
+          sx={{ 
+            mb: 4,
+            boxShadow: 3,
+            borderRadius: 2,
+            overflow: 'hidden'
+          }}
+        >
           <CardContent>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6} md={3}>
@@ -358,6 +464,7 @@ const ProjectList: React.FC = () => {
                   select
                   value={filters.status || ''}
                   onChange={(e) => handleFilterChange('status', e.target.value)}
+                  size="small"
                 >
                   <MenuItem value="">Tous</MenuItem>
                   {statusOptions.map((status) => (
@@ -373,6 +480,7 @@ const ProjectList: React.FC = () => {
                   label="Client"
                   value={filters.clientName || ''}
                   onChange={(e) => handleFilterChange('clientName', e.target.value)}
+                  size="small"
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
@@ -381,6 +489,7 @@ const ProjectList: React.FC = () => {
                   label="Type de bâtiment"
                   value={filters.buildingType || ''}
                   onChange={(e) => handleFilterChange('buildingType', e.target.value)}
+                  size="small"
                 />
               </Grid>
             </Grid>
@@ -397,18 +506,34 @@ const ProjectList: React.FC = () => {
               <Paper
                 elevation={3}
                 sx={{
-                  p: 3,
+                  p: { xs: 3, sm: 2.5 },
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 2,
+                  gap: { xs: 2.5, sm: 2 },
                   backgroundColor: getClassColor(projectClasses[project.id] || 'NA'),
-                  color: getClassTextColor(projectClasses[project.id] || 'NA')
+                  color: getClassTextColor(projectClasses[project.id] || 'NA'),
+                  borderRadius: { xs: '16px', sm: '12px' }
                 }}
               >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <Box>
-                    <Typography variant="h6">{project.name}</Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    <Typography 
+                      variant="h6" 
+                      sx={{ 
+                        fontSize: { xs: '1.25rem', sm: '1.15rem' },
+                        fontWeight: 600,
+                        mb: 0.5
+                      }}
+                    >
+                      {project.name}
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        opacity: 0.9,
+                        fontSize: { xs: '0.95rem', sm: '0.875rem' }
+                      }}
+                    >
                       {project.clientName}
                     </Typography>
                     {renderCategoryIcons(project.id)}
@@ -418,10 +543,12 @@ const ProjectList: React.FC = () => {
                     sx={{
                       bgcolor: 'rgba(255, 255, 255, 0.2)',
                       color: 'inherit',
-                      fontSize: '1.2rem',
+                      fontSize: { xs: '1.35rem', sm: '1.2rem' },
                       fontWeight: 'bold',
                       border: '2px solid',
-                      borderColor: 'rgba(255, 255, 255, 0.3)'
+                      borderColor: 'rgba(255, 255, 255, 0.3)',
+                      height: { xs: '36px', sm: '32px' },
+                      ml: 1
                     }}
                   />
                 </Box>
@@ -431,8 +558,8 @@ const ProjectList: React.FC = () => {
                     variant="determinate"
                     value={projectProgresses[project.id] || 0}
                     sx={{ 
-                      height: 8, 
-                      borderRadius: 4,
+                      height: { xs: 10, sm: 8 }, 
+                      borderRadius: { xs: 5, sm: 4 },
                       backgroundColor: 'rgba(0, 0, 0, 0.2)',
                       '& .MuiLinearProgress-bar': {
                         backgroundColor: 'rgba(0, 0, 0, 0.3)'
@@ -442,17 +569,23 @@ const ProjectList: React.FC = () => {
                   <Typography 
                     variant="caption" 
                     sx={{ 
-                      mt: 0.5, 
+                      mt: 1,
                       display: 'block', 
                       opacity: 0.9,
-                      fontWeight: projectProgresses[project.id] === 100 ? 600 : 'inherit'
+                      fontWeight: projectProgresses[project.id] === 100 ? 600 : 'inherit',
+                      fontSize: { xs: '0.9rem', sm: '0.75rem' }
                     }}
                   >
                     Progression: {Math.round(projectProgresses[project.id] || 0)}%
                   </Typography>
                 </Box>
 
-                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  gap: { xs: 2, sm: 1.5 }, 
+                  justifyContent: 'flex-end',
+                  mt: { xs: 1, sm: 0 }
+                }}>
                   <Button
                     variant="contained"
                     onClick={() => navigate(`/projects/${project.id}/assessment`)}
@@ -461,7 +594,9 @@ const ProjectList: React.FC = () => {
                       color: 'inherit',
                       '&:hover': {
                         bgcolor: 'rgba(255, 255, 255, 0.3)'
-                      }
+                      },
+                      fontSize: { xs: '0.95rem', sm: '0.875rem' },
+                      py: { xs: 1.2, sm: 1 }
                     }}
                   >
                     Évaluer
@@ -474,7 +609,9 @@ const ProjectList: React.FC = () => {
                       color: 'inherit',
                       '&:hover': {
                         bgcolor: 'rgba(255, 255, 255, 0.3)'
-                      }
+                      },
+                      fontSize: { xs: '0.95rem', sm: '0.875rem' },
+                      py: { xs: 1.2, sm: 1 }
                     }}
                   >
                     Détails
@@ -487,7 +624,9 @@ const ProjectList: React.FC = () => {
                       color: 'inherit',
                       '&:hover': {
                         bgcolor: 'rgba(255, 255, 255, 0.3)'
-                      }
+                      },
+                      fontSize: { xs: '0.95rem', sm: '0.875rem' },
+                      py: { xs: 1.2, sm: 1 }
                     }}
                   >
                     Supprimer
@@ -501,16 +640,20 @@ const ProjectList: React.FC = () => {
 
       <Dialog
         open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
+        onClose={handleDeleteCancel}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
       >
-        <DialogTitle>Confirmer la suppression</DialogTitle>
+        <DialogTitle id="alert-dialog-title">
+          Confirmer la suppression
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText>
+          <DialogContentText id="alert-dialog-description">
             Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Annuler</Button>
+          <Button onClick={handleDeleteCancel}>Annuler</Button>
           <Button onClick={handleDeleteConfirm} color="error" autoFocus>
             Supprimer
           </Button>
