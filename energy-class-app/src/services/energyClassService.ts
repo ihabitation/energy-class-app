@@ -1,4 +1,13 @@
 import { EnergyClass, Category, SubCategory, ClassOption, BuildingAssessment } from '../types/energyClass';
+import {
+  Thermostat,
+  WaterDrop,
+  AcUnit,
+  Air,
+  Lightbulb,
+  Blinds,
+  Settings
+} from '@mui/icons-material';
 
 // Import des données JSON
 import chauffageData from '../ressources/01 chauffage.json';
@@ -19,26 +28,68 @@ const energyData = {
   gtb: gtbData as EnergyClass
 };
 
+// Mapping des icônes pour chaque catégorie
+const categoryIcons = {
+  chauffage: Thermostat,
+  ecs: WaterDrop,
+  refroidissement: AcUnit,
+  ventilation: Air,
+  eclairage: Lightbulb,
+  stores: Blinds,
+  gtb: Settings
+};
+
+// Fonction pour mettre en majuscule la première lettre
+const capitalizeFirstLetter = (string: string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
 export const getCategories = (): Category[] => {
   return Object.entries(energyData).map(([id, data]) => {
     const mainCategory = Object.values(data)[0];
-    const subCategories = Object.entries(mainCategory.sous_categories).map(([subId, subData]) => ({
-      id: `${id}.${subId}`,
-      name: subId.split('_').slice(1).join(' '),
-      description: subData.description,
-      details: Object.values(subData.classes)
-        .map(classData => Object.values(classData as Record<string, { description: string; impact: string }>))
-        .flat()
-        .map(option => `${option.description}\nImpact : ${option.impact}`)
-        .join('\n\n')
-    }));
+    const subCategories = Object.entries(mainCategory.sous_categories).map(([subId, subData]) => {
+      const subCategoryId = `${id}.${subId}`;
+      const options = Object.entries(subData.classes).flatMap(([classType, classData]) => {
+        const className = classType.split('_')[1] as 'A' | 'B' | 'C' | 'D' | 'NA';
+        return Object.entries(classData as Record<string, { description: string; impact: string }>).map(([optionId, optionData]) => ({
+          id: optionId,
+          name: capitalizeFirstLetter(optionId.split('_').join(' ')),
+          description: capitalizeFirstLetter(optionData.description),
+          impact: capitalizeFirstLetter(optionData.impact),
+          subCategoryId,
+          classType: className,
+          class: className
+        }));
+      });
+
+      // Ajouter l'option NA
+      options.push({
+        id: 'non_applicable',
+        name: 'Non applicable',
+        description: 'Cette sous-catégorie n\'est pas applicable à ce bâtiment',
+        impact: 'Cette sous-catégorie ne sera pas prise en compte dans le calcul de la classe finale',
+        subCategoryId,
+        classType: 'NA',
+        class: 'NA'
+      });
+
+      return {
+        id: subCategoryId,
+        name: capitalizeFirstLetter(subId.split('_').slice(1).join(' ')),
+        description: capitalizeFirstLetter(subData.description),
+        details: capitalizeFirstLetter(subData.description),
+        options,
+        icon: categoryIcons[id as keyof typeof categoryIcons]
+      };
+    });
 
     return {
       id,
-      name: Object.keys(data)[0].split('_').slice(1).join(' '),
-      description: mainCategory.description,
+      name: capitalizeFirstLetter(Object.keys(data)[0].split('_').slice(1).join(' ')),
+      description: capitalizeFirstLetter(mainCategory.description),
       isEnabled: true,
-      subCategories
+      subCategories,
+      icon: categoryIcons[id as keyof typeof categoryIcons]
     };
   });
 };
@@ -49,17 +100,20 @@ export const getSubCategories = (categoryId: string): SubCategory[] => {
 
   const mainCategory = Object.values(categoryData)[0];
   return Object.entries(mainCategory.sous_categories).map(([id, data]) => {
+    const subCategoryId = `${categoryId}.${id}`;
     // Créer un résumé de la description
-    const shortDescription = data.description.split('.')[0] + '.';
+    const shortDescription = capitalizeFirstLetter(data.description.split('.')[0] + '.');
 
     // Extraire les options pour chaque classe
     const options = Object.entries(data.classes).flatMap(([classType, classData]) => {
       const className = classType.split('_')[1] as 'A' | 'B' | 'C' | 'D' | 'NA';
       return Object.entries(classData as Record<string, { description: string; impact: string }>).map(([optionId, optionData]) => ({
         id: optionId,
-        name: optionId.split('_').join(' '),
-        description: optionData.description,
-        impact: optionData.impact,
+        name: capitalizeFirstLetter(optionId.split('_').join(' ')),
+        description: capitalizeFirstLetter(optionData.description),
+        impact: capitalizeFirstLetter(optionData.impact),
+        subCategoryId,
+        classType: className,
         class: className
       }));
     });
@@ -70,15 +124,18 @@ export const getSubCategories = (categoryId: string): SubCategory[] => {
       name: 'Non applicable',
       description: 'Cette sous-catégorie n\'est pas applicable à ce bâtiment',
       impact: 'Cette sous-catégorie ne sera pas prise en compte dans le calcul de la classe finale',
+      subCategoryId,
+      classType: 'NA',
       class: 'NA'
     });
 
     return {
-      id: `${categoryId}.${id}`,
-      name: id.split('_').slice(1).join(' '),
+      id: subCategoryId,
+      name: capitalizeFirstLetter(id.split('_').slice(1).join(' ')),
       description: shortDescription,
-      details: data.description,
-      options
+      details: capitalizeFirstLetter(data.description),
+      options,
+      icon: categoryIcons[categoryId as keyof typeof categoryIcons]
     };
   });
 };
@@ -93,15 +150,17 @@ export const getClassOptions = (categoryId: string, subCategoryId: string): Clas
 
   const options: ClassOption[] = [];
   Object.entries(subCategory.classes).forEach(([classType, classData]) => {
+    const className = classType.split('_')[1] as 'A' | 'B' | 'C' | 'D' | 'NA';
     Object.entries(classData as Record<string, { description: string; impact: string; images?: string[] }>).forEach(([optionId, optionData]) => {
       options.push({
         id: optionId,
-        name: optionId.split('_').join(' '),
-        description: optionData.description,
-        impact: optionData.impact,
+        name: capitalizeFirstLetter(optionId.split('_').join(' ')),
+        description: capitalizeFirstLetter(optionData.description),
+        impact: capitalizeFirstLetter(optionData.impact),
         images: optionData.images,
         subCategoryId,
-        classType: classType.split('_')[1] as 'A' | 'B' | 'C' | 'D' | 'NA'
+        classType: className,
+        class: className
       });
     });
   });
@@ -114,7 +173,8 @@ export const getClassOptions = (categoryId: string, subCategoryId: string): Clas
     impact: 'Cette sous-catégorie ne sera pas prise en compte dans le calcul de la classe finale',
     images: [],
     subCategoryId,
-    classType: 'NA'
+    classType: 'NA',
+    class: 'NA'
   });
 
   return options;

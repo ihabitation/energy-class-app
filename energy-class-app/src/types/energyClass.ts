@@ -1,3 +1,5 @@
+import { SvgIconComponent } from '@mui/icons-material';
+
 export interface EnergyClass {
   [key: string]: {
     description: string;
@@ -24,20 +26,16 @@ export interface Category {
   description: string;
   isEnabled: boolean;
   subCategories: SubCategory[];
+  icon: SvgIconComponent;
 }
 
 export interface SubCategory {
   id: string;
   name: string;
   description: string;
-  details?: string;
-  options?: {
-    id: string;
-    name: string;
-    description: string;
-    impact: string;
-    class: 'A' | 'B' | 'C' | 'D' | 'NA';
-  }[];
+  details: string;
+  options: ClassOption[];
+  icon: SvgIconComponent;
 }
 
 export interface ClassOption {
@@ -46,8 +44,9 @@ export interface ClassOption {
   description: string;
   impact: string;
   images?: string[];
-  subCategoryId?: string;
+  subCategoryId: string;
   classType: 'A' | 'B' | 'C' | 'D' | 'NA';
+  class: 'A' | 'B' | 'C' | 'D' | 'NA';
 }
 
 export interface BuildingAssessment {

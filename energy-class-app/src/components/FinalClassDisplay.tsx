@@ -28,7 +28,23 @@ const FinalClassDisplay: React.FC<{ projectId: string }> = ({ projectId }) => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: isMobile ? '120px' : '160px'
+        minHeight: isMobile ? '120px' : '160px',
+        transition: 'all 0.3s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: theme.shadows[6],
+        },
+        animation: 'fadeIn 0.5s ease-in-out',
+        '@keyframes fadeIn': {
+          '0%': {
+            opacity: 0,
+            transform: 'translateY(10px)',
+          },
+          '100%': {
+            opacity: 1,
+            transform: 'translateY(0)',
+          },
+        },
       }}
     >
       <Typography 
@@ -37,7 +53,9 @@ const FinalClassDisplay: React.FC<{ projectId: string }> = ({ projectId }) => {
         gutterBottom
         sx={{ 
           fontWeight: 'medium',
-          mb: isMobile ? 1 : 2
+          mb: isMobile ? 1 : 2,
+          letterSpacing: '0.5px',
+          textTransform: 'uppercase',
         }}
       >
         Classe énergétique finale
@@ -47,7 +65,19 @@ const FinalClassDisplay: React.FC<{ projectId: string }> = ({ projectId }) => {
           display: 'flex', 
           justifyContent: 'center', 
           alignItems: 'center',
-          gap: isMobile ? 1 : 2
+          gap: isMobile ? 1 : 2,
+          position: 'relative',
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: '-10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '40%',
+            height: '2px',
+            backgroundColor: 'currentColor',
+            opacity: 0.3,
+          },
         }}
       >
         <Typography 
@@ -56,7 +86,19 @@ const FinalClassDisplay: React.FC<{ projectId: string }> = ({ projectId }) => {
           sx={{ 
             fontWeight: 'bold',
             fontSize: isMobile ? '3rem' : '4rem',
-            lineHeight: 1
+            lineHeight: 1,
+            textShadow: '2px 2px 4px rgba(0,0,0,0.1)',
+            animation: 'scaleIn 0.5s ease-out',
+            '@keyframes scaleIn': {
+              '0%': {
+                transform: 'scale(0.8)',
+                opacity: 0,
+              },
+              '100%': {
+                transform: 'scale(1)',
+                opacity: 1,
+              },
+            },
           }}
         >
           {finalClass}

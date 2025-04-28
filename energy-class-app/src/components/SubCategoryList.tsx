@@ -20,6 +20,7 @@ const SubCategoryList: React.FC<SubCategoryListProps> = ({ categoryId, projectId
       {subCategories.map((subCategory) => {
         const classType = assessment[subCategory.id]?.classType;
         const selectedOption = assessment[subCategory.id]?.selectedOption;
+        const Icon = subCategory.icon;
 
         return (
           <Grid item xs={12} sm={6} md={4} key={subCategory.id}>
@@ -46,18 +47,19 @@ const SubCategoryList: React.FC<SubCategoryListProps> = ({ categoryId, projectId
                 }}
               >
                 <Box sx={{ width: '100%', mb: 2 }}>
-                  <Typography 
-                    variant="h6" 
-                    gutterBottom
-                    sx={{
-                      fontWeight: 500,
-                      fontSize: '1.25rem',
-                      color: 'primary.main',
-                      mb: 1.5
-                    }}
-                  >
-                    {subCategory.name}
-                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                    <Icon sx={{ mr: 1, color: 'primary.main' }} />
+                    <Typography 
+                      variant="h6" 
+                      sx={{
+                        fontWeight: 500,
+                        fontSize: '1.25rem',
+                        color: 'primary.main'
+                      }}
+                    >
+                      {subCategory.name}
+                    </Typography>
+                  </Box>
                   <Typography 
                     variant="body2" 
                     color="text.secondary" 

@@ -20,6 +20,7 @@ import {
   DialogContentText,
   DialogActions,
   Paper,
+  Tooltip,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -36,6 +37,10 @@ import { supabase } from '../lib/supabase';
 
 type EnergyClass = 'A' | 'B' | 'C' | 'D' | 'NA';
 
+interface ProjectCategories {
+  [projectId: string]: string[];
+}
+
 const ProjectList: React.FC = () => {
   const navigate = useNavigate();
   const { projectId } = useParams<{ projectId: string }>();
@@ -45,6 +50,43 @@ const ProjectList: React.FC = () => {
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const { categories } = useCategories();
   const { getAssessment } = useAssessment();
+  const [projectCategories, setProjectCategories] = useState<ProjectCategories>({});
+
+  // Fonction pour récupérer les catégories activées depuis global_results
+  const getProjectEnabledCategories = async (projectId: string): Promise<string[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('global_results')
+        .select('category_id, is_enabled')
+        .eq('project_id', projectId)
+        .eq('is_enabled', true);
+
+      if (error) {
+        console.error('Erreur lors de la récupération des catégories:', error);
+        return [];
+      }
+
+      return data.map(item => item.category_id);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des catégories:', error);
+      return [];
+    }
+  };
+
+  // Charger les catégories activées pour tous les projets
+  useEffect(() => {
+    const loadProjectCategories = async () => {
+      const categories: ProjectCategories = {};
+      for (const project of projects) {
+        categories[project.id] = await getProjectEnabledCategories(project.id);
+      }
+      setProjectCategories(categories);
+    };
+
+    if (projects.length > 0) {
+      loadProjectCategories();
+    }
+  }, [projects]);
 
   const calculateProjectProgress = (projectId: string) => {
     if (!projectId) return 0;
@@ -173,6 +215,68 @@ const ProjectList: React.FC = () => {
     completed: 'Terminé'
   };
 
+  const renderCategoryIcons = (projectId: string) => {
+    try {
+      const enabledCategoryIds = projectCategories[projectId] || [];
+      const enabledCategories = categories.filter(cat => enabledCategoryIds.includes(cat.id));
+      const currentClass = projectClasses[projectId] || 'NA';
+      const iconColor = currentClass !== 'NA' ? 'rgba(0, 0, 0, 0.3)' : 'primary.main';
+      
+      if (enabledCategories.length === 0) {
+        return null;
+      }
+
+      return (
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            gap: { xs: 1.5, sm: 1 }, 
+            mt: 1,
+            flexWrap: 'wrap',
+            justifyContent: 'flex-start'
+          }}
+        >
+          {enabledCategories.map(category => {
+            if (!category || !category.icon) return null;
+            
+            const Icon = category.icon;
+            return (
+              <Tooltip 
+                key={category.id} 
+                title={category.name}
+                placement="top"
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: { xs: '40px', sm: '32px' },
+                    height: { xs: '40px', sm: '32px' }
+                  }}
+                >
+                  <Icon sx={{ 
+                    fontSize: { xs: '2rem', sm: '1.5rem' },
+                    color: iconColor,
+                    opacity: 0.9,
+                    transition: 'all 0.2s ease-in-out',
+                    '&:hover': {
+                      opacity: 1,
+                      transform: 'scale(1.1)'
+                    }
+                  }} />
+                </Box>
+              </Tooltip>
+            );
+          })}
+        </Box>
+      );
+    } catch (error) {
+      console.error('Erreur lors du rendu des icônes:', error);
+      return null;
+    }
+  };
+
   if (error) {
     return (
       <Container>
@@ -203,6 +307,7 @@ const ProjectList: React.FC = () => {
               <Typography variant="subtitle1">
                 {currentProject.clientName}
               </Typography>
+              {renderCategoryIcons(currentProject.id)}
             </Box>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h2" component="div" sx={{ fontWeight: 'bold' }}>
@@ -226,7 +331,7 @@ const ProjectList: React.FC = () => {
             letterSpacing: '0.5px'
           }}
         >
-          PROJETS D'ÉVALUATION ÉNERGÉTIQUE
+          VOS PROJETS D'AUDIT
         </Typography>
         <Box>
           <IconButton onClick={() => setShowFilters(!showFilters)} sx={{ mr: 1 }}>
@@ -306,6 +411,7 @@ const ProjectList: React.FC = () => {
                     <Typography variant="body2" sx={{ opacity: 0.9 }}>
                       {project.clientName}
                     </Typography>
+                    {renderCategoryIcons(project.id)}
                   </Box>
                   <Chip
                     label={projectClasses[project.id] || 'NA'}
