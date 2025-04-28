@@ -164,8 +164,6 @@ export interface Database {
           id: string;
           project_id: string;
           final_class: 'A' | 'B' | 'C' | 'D' | 'NA';
-          enabled_categories: string[];
-          disabled_categories: string[];
           last_updated: string;
           created_at: string;
           updated_at: string;

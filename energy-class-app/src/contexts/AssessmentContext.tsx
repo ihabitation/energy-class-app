@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { BuildingAssessment } from '../types/energyClass';
 import { supabase } from '../lib/supabase';
 import { calculateFinalClass } from '../services/energyClassService';
-import { getCategories } from '../services/energyClassService';
+import { getCategories, getSubCategories } from '../services/energyClassService';
 
 interface AssessmentContextType {
   getAssessment: (projectId: string) => BuildingAssessment;
@@ -29,38 +29,59 @@ export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const finalClass = calculateFinalClass(assessment, enabledCategories);
       console.log('Nouvelle classe finale calculée:', finalClass);
 
-      // Supprimer les anciennes entrées pour ce projet
+      // Calculer la progression
+      let totalSubCategories = 0;
+      let completedSubCategories = 0;
+
+      enabledCategories.forEach(categoryId => {
+        const subCategories = getSubCategories(categoryId);
+        totalSubCategories += subCategories.length;
+        
+        completedSubCategories += subCategories.filter((subCat: { id: string }) => {
+          const classType = assessment[subCat.id]?.classType;
+          return classType !== undefined;
+        }).length;
+      });
+
+      const progress = totalSubCategories > 0 
+        ? Math.round((completedSubCategories / totalSubCategories) * 100) 
+        : 0;
+      console.log('Progression calculée:', progress);
+
+      // Supprimer les entrées existantes
       const { error: deleteError } = await supabase
         .from('global_results')
         .delete()
         .eq('project_id', projectId);
 
       if (deleteError) {
-        console.error('Erreur lors de la suppression des anciennes entrées:', deleteError);
+        console.error('Erreur lors de la suppression des entrées existantes:', deleteError);
         return;
       }
 
-      // Créer les nouvelles entrées
-      const allCategories = getCategories();
-      const entries = allCategories.map(category => ({
+      // Créer les nouvelles entrées uniquement pour les catégories activées
+      const entries = enabledCategories.map(categoryId => ({
         project_id: projectId,
-        category_id: category.id,
-        is_enabled: enabledCategories.includes(category.id),
+        category_id: categoryId,
+        final_class: finalClass,
+        project_progress: progress,
         last_updated: new Date().toISOString()
       }));
 
-      const { error: insertError } = await supabase
+      const { error: upsertError } = await supabase
         .from('global_results')
-        .insert(entries);
+        .upsert(entries, {
+          onConflict: 'project_id,category_id'
+        });
 
-      if (insertError) {
-        console.error('Erreur lors de la création des nouvelles entrées:', insertError);
+      if (upsertError) {
+        console.error('Erreur lors de la mise à jour des entrées:', upsertError);
         return;
       }
 
-      console.log('Résultats globaux mis à jour avec succès');
+      console.log('Classe finale et progression mises à jour avec succès');
     } catch (error) {
-      console.error('Erreur lors de la mise à jour des résultats globaux:', error);
+      console.error('Erreur lors de la mise à jour de la classe finale et de la progression:', error);
     }
   };
 

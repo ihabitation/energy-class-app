@@ -27,13 +27,13 @@ const SupabaseTest: React.FC = () => {
   }, []);
 
   if (error) {
-    return (
-      <Box sx={{ p: 3 }}>
+  return (
+    <Box sx={{ p: 3 }}>
         <Alert severity="error" sx={{ mt: 2 }}>
           {error}
         </Alert>
-      </Box>
-    );
+    </Box>
+  );
   }
 
   return null;

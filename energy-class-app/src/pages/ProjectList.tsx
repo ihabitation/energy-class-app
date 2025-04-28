@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Container,
@@ -32,6 +32,9 @@ import { useCategories } from '../contexts/CategoryContext';
 import { useAssessment } from '../contexts/AssessmentContext';
 import { calculateFinalClass } from '../services/energyClassService';
 import { getSubCategories } from '../services/energyClassService';
+import { supabase } from '../lib/supabase';
+
+type EnergyClass = 'A' | 'B' | 'C' | 'D' | 'NA';
 
 const ProjectList: React.FC = () => {
   const navigate = useNavigate();
@@ -65,17 +68,86 @@ const ProjectList: React.FC = () => {
     return totalSubCategories > 0 ? (completedSubCategories / totalSubCategories) * 100 : 0;
   };
 
-  const getFinalClass = (projectId: string) => {
+  const getFinalClass = async (projectId: string): Promise<EnergyClass> => {
     if (!projectId) return 'NA';
     
-    const enabledCategories = categories.filter(cat => cat.isEnabled).map(cat => cat.id);
-    const assessment = getAssessment(projectId);
-    return calculateFinalClass(assessment, enabledCategories);
+    try {
+      const { data, error } = await supabase
+        .from('global_results')
+        .select('final_class, last_updated')
+        .eq('project_id', projectId)
+        .order('last_updated', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('Erreur lors de la récupération de la classe finale:', error);
+        return 'NA';
+      }
+
+      return (data?.[0]?.final_class as EnergyClass) || 'NA';
+    } catch (error) {
+      console.error('Erreur lors de la récupération de la classe finale:', error);
+      return 'NA';
+    }
   };
+
+  const [projectClasses, setProjectClasses] = useState<Record<string, EnergyClass>>({});
+
+  useEffect(() => {
+    const loadProjectClasses = async () => {
+      const classes: Record<string, EnergyClass> = {};
+      for (const project of projects) {
+        classes[project.id] = await getFinalClass(project.id);
+      }
+      setProjectClasses(classes);
+    };
+
+    if (projects.length > 0) {
+      loadProjectClasses();
+    }
+  }, [projects]);
+
+  const getProjectProgress = async (projectId: string): Promise<number> => {
+    if (!projectId) return 0;
+    
+    try {
+      const { data, error } = await supabase
+        .from('global_results')
+        .select('project_progress, last_updated')
+        .eq('project_id', projectId)
+        .order('last_updated', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('Erreur lors de la récupération de la progression:', error);
+        return 0;
+      }
+
+      return data?.[0]?.project_progress || 0;
+    } catch (error) {
+      console.error('Erreur lors de la récupération de la progression:', error);
+      return 0;
+    }
+  };
+
+  const [projectProgresses, setProjectProgresses] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const loadProjectProgresses = async () => {
+      const progresses: Record<string, number> = {};
+      for (const project of projects) {
+        progresses[project.id] = await getProjectProgress(project.id);
+      }
+      setProjectProgresses(progresses);
+    };
+
+    if (projects.length > 0) {
+      loadProjectProgresses();
+    }
+  }, [projects]);
 
   const currentProject = projectId ? projects.find(p => p.id === projectId) : null;
   const progress = projectId ? calculateProjectProgress(projectId) : 0;
-  const finalClass = projectId ? getFinalClass(projectId) : 'NA';
 
   const handleFilterChange = (key: keyof ProjectFilters, value: any) => {
     setFilters({ ...filters, [key]: value });
@@ -119,8 +191,8 @@ const ProjectList: React.FC = () => {
           sx={{ 
             p: 3, 
             mb: 4,
-            backgroundColor: currentProject.worstClass !== 'NA' ? getClassColor(currentProject.worstClass) : 'background.paper',
-            color: currentProject.worstClass !== 'NA' ? getClassTextColor(currentProject.worstClass) : 'text.primary'
+            backgroundColor: projectClasses[currentProject.id] !== 'NA' ? getClassColor(projectClasses[currentProject.id]) : 'background.paper',
+            color: projectClasses[currentProject.id] !== 'NA' ? getClassTextColor(projectClasses[currentProject.id]) : 'text.primary'
           }}
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -134,7 +206,7 @@ const ProjectList: React.FC = () => {
             </Box>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h2" component="div" sx={{ fontWeight: 'bold' }}>
-                {currentProject.worstClass !== 'NA' ? currentProject.worstClass : 'NA'}
+                {projectClasses[currentProject.id] !== 'NA' ? projectClasses[currentProject.id] : 'NA'}
               </Typography>
               <Typography variant="subtitle2">
                 Classe finale
@@ -224,8 +296,8 @@ const ProjectList: React.FC = () => {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 2,
-                  backgroundColor: getClassColor(getFinalClass(project.id)),
-                  color: getClassTextColor(getFinalClass(project.id))
+                  backgroundColor: getClassColor(projectClasses[project.id] || 'NA'),
+                  color: getClassTextColor(projectClasses[project.id] || 'NA')
                 }}
               >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -236,7 +308,7 @@ const ProjectList: React.FC = () => {
                     </Typography>
                   </Box>
                   <Chip
-                    label={getFinalClass(project.id)}
+                    label={projectClasses[project.id] || 'NA'}
                     sx={{
                       bgcolor: 'rgba(255, 255, 255, 0.2)',
                       color: 'inherit',
@@ -251,7 +323,7 @@ const ProjectList: React.FC = () => {
                 <Box sx={{ width: '100%' }}>
                   <LinearProgress
                     variant="determinate"
-                    value={calculateProjectProgress(project.id)}
+                    value={projectProgresses[project.id] || 0}
                     sx={{ 
                       height: 8, 
                       borderRadius: 4,
@@ -267,10 +339,10 @@ const ProjectList: React.FC = () => {
                       mt: 0.5, 
                       display: 'block', 
                       opacity: 0.9,
-                      fontWeight: calculateProjectProgress(project.id) === 100 ? 600 : 'inherit'
+                      fontWeight: projectProgresses[project.id] === 100 ? 600 : 'inherit'
                     }}
                   >
-                    Progression: {Math.round(calculateProjectProgress(project.id))}%
+                    Progression: {Math.round(projectProgresses[project.id] || 0)}%
                   </Typography>
                 </Box>
 
