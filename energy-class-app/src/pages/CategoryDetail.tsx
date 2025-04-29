@@ -65,18 +65,20 @@ const CategoryDetail: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Button
-        startIcon={<ArrowBackIcon />}
-        onClick={() => navigate(`/projects/${projectId}/assessment`)}
-        sx={{ 
-          mb: 4,
-          color: 'primary.main',
-          textTransform: 'none',
-          fontSize: '1rem'
-        }}
-      >
-        RETOUR À L'ÉVALUATION
-      </Button>
+      {!isMobile && (
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(`/projects/${projectId}/assessment`)}
+          sx={{ 
+            mb: 4,
+            color: 'primary.main',
+            textTransform: 'none',
+            fontSize: '1rem'
+          }}
+        >
+          RETOUR À L'ÉVALUATION
+        </Button>
+      )}
 
       <Paper 
         elevation={3} 

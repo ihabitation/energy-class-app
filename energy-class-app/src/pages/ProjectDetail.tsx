@@ -10,6 +10,8 @@ import {
   LinearProgress,
   Button,
   Divider,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AssessmentIcon from '@mui/icons-material/Assessment';
@@ -42,6 +44,8 @@ const ProjectDetail: React.FC = () => {
   const { categories } = useCategories();
   const { getAssessment } = useAssessment();
   const assessment = projectId ? getAssessment(projectId) : {};
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     const loadProject = async () => {
@@ -101,13 +105,15 @@ const ProjectDetail: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Button
-        startIcon={<ArrowBackIcon />}
-        onClick={() => navigate('/')}
-        sx={{ mb: 3 }}
-      >
-        Retour aux projets
-      </Button>
+      {!isMobile && (
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate('/')}
+          sx={{ mb: 3 }}
+        >
+          Retour aux projets
+        </Button>
+      )}
 
       <SupabaseTest />
 

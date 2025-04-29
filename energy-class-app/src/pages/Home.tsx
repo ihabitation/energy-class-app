@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Box, Button, Paper } from '@mui/material';
+import { Container, Typography, Box, Button, Paper, useTheme, useMediaQuery } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CategoryList from '../components/CategoryList';
 import FinalClassDisplay from '../components/FinalClassDisplay';
@@ -14,6 +14,8 @@ const Home: React.FC = () => {
   const { projects } = useProjects();
   const { categories, toggleCategory } = useCategories();
   const { getAssessment } = useAssessment();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleCategoryToggle = (categoryId: string) => {
     if (projectId) {
@@ -36,13 +38,15 @@ const Home: React.FC = () => {
   return (
     <Container maxWidth="lg">
       <Box sx={{ my: 4 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate(`/projects/${projectId}`)}
-          sx={{ mb: 2 }}
-        >
-          Retour au projet
-        </Button>
+        {!isMobile && (
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate(`/projects/${projectId}`)}
+            sx={{ mb: 2 }}
+          >
+            Retour au projet
+          </Button>
+        )}
 
         <Typography variant="h4" component="h1" gutterBottom>
           {currentProject.name}

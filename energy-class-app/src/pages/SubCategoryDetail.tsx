@@ -1,10 +1,10 @@
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Box, Button } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import React, { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { Container, Typography, Box } from '@mui/material';
 import ClassSelection from '../components/ClassSelection';
 import { getSubCategories } from '../services/energyClassService';
 import { useProjects } from '../contexts/ProjectContext';
+import { useNavigation } from '../contexts/NavigationContext';
 
 const SubCategoryDetail: React.FC = () => {
   const { projectId, categoryId, subCategoryId } = useParams<{
@@ -12,8 +12,8 @@ const SubCategoryDetail: React.FC = () => {
     categoryId: string;
     subCategoryId: string;
   }>();
-  const navigate = useNavigate();
   const { projects } = useProjects();
+  const navigation = useNavigation();
 
   const currentProject = projects.find(p => p.id === projectId);
   const subCategory = getSubCategories(categoryId || '').find(
@@ -33,14 +33,6 @@ const SubCategoryDetail: React.FC = () => {
   return (
     <Container maxWidth="lg">
       <Box sx={{ my: 4 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate(`/projects/${projectId}/category/${categoryId}`)}
-          sx={{ mb: 2 }}
-        >
-          Retour à la catégorie
-        </Button>
-
         <Typography variant="h4" component="h1" gutterBottom>
           {subCategory.name}
         </Typography>
