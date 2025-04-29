@@ -66,8 +66,7 @@ const MobileNavigation: React.FC = () => {
   const getCurrentValue = () => {
     if (isProjectList) return 0;
     if (isAssessmentView) return 2;
-    if (isCategoryView) return 2;
-    if (isSubCategoryView) return 3;
+    if (isCategoryView || isSubCategoryView) return 3;
     return 1;
   };
 
@@ -83,18 +82,14 @@ const MobileNavigation: React.FC = () => {
         break;
       case 2:
         if (currentProjectId) {
-          if (isSubCategoryView && subCategoryMatch) {
-            // Remonter au niveau de la catégorie
-            const { projectId, categoryId } = subCategoryMatch.params;
-            navigate(`/projects/${projectId}/category/${categoryId}`);
-          } else if (!isCategoryView && !isSubCategoryView) {
-            // Aller à la vue d'évaluation
+          // Si on n'est pas déjà sur la vue d'évaluation, y aller
+          if (!isAssessmentView) {
             navigate(`/projects/${currentProjectId}/assessment`);
           }
         }
         break;
       case 3:
-        // Ne rien faire si on est déjà sur la sous-catégorie
+        // Ne rien faire si on est déjà sur la catégorie/sous-catégorie
         break;
     }
   };
@@ -156,15 +151,15 @@ const MobileNavigation: React.FC = () => {
             )}
             {!isProjectList && currentProjectId && (
               <BottomNavigationAction 
-                label={getActionLabel()}
-                icon={getCategoryIcon(currentCategory)}
+                label="Évaluation"
+                icon={<AssessmentIcon />}
+                onClick={() => navigate(`/projects/${currentProjectId}/assessment`)}
               />
             )}
-            {isSubCategoryView && (
+            {(isCategoryView || isSubCategoryView) && (
               <BottomNavigationAction 
-                label="Classe"
-                icon={<AssessmentIcon />}
-                disabled
+                label={currentCategory || "Catégorie"}
+                icon={getCategoryIcon(currentCategory)}
               />
             )}
           </BottomNavigation>

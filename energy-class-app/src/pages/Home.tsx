@@ -48,10 +48,6 @@ const Home: React.FC = () => {
           </Button>
         )}
 
-        <Typography variant="h4" component="h1" gutterBottom>
-          {currentProject.name}
-        </Typography>
-
         <FinalClassDisplay projectId={projectId || ''} />
 
         <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4 }}>
