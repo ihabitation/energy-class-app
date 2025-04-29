@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { List, ListItem, ListItemText, ListItemButton, Typography, Box, LinearProgress, Button, useTheme, useMediaQuery } from '@mui/material';
+import { List, ListItem, ListItemText, ListItemButton, Typography, Box, LinearProgress, Button, useTheme, useMediaQuery, Paper, Chip } from '@mui/material';
 import { Category } from '../types/energyClass';
 import { getSubCategories } from '../services/energyClassService';
 import { getClassColor, getClassTextColor } from '../utils/colors';
@@ -15,6 +15,7 @@ import { BuildingAssessment } from '../types/energyClass';
 import { useCategories } from '../contexts/CategoryContext';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import PowerIcon from '@mui/icons-material/Power';
+import { alpha } from '@mui/material/styles';
 
 interface CategoryListProps {
   assessment: BuildingAssessment;
@@ -53,7 +54,7 @@ const CategoryList: React.FC<CategoryListProps> = ({ assessment, projectId }) =>
     return {
       completed: completedSubCategories,
       total: totalSubCategories,
-      percentage: totalSubCategories > 0 ? (completedSubCategories / totalSubCategories) * 100 : 0
+      percentage: totalSubCategories > 0 ? Math.round((completedSubCategories / totalSubCategories) * 100) : 0
     };
   };
 
@@ -76,9 +77,9 @@ const CategoryList: React.FC<CategoryListProps> = ({ assessment, projectId }) =>
   const getIcon = (categoryId: string) => {
     const iconProps = { 
       sx: { 
-        fontSize: '2rem',
+        fontSize: isMobile ? '1.5rem' : '1.75rem',
         color: 'primary.main',
-        mr: 2
+        mb: 1
       }
     };
 
@@ -122,106 +123,146 @@ const CategoryList: React.FC<CategoryListProps> = ({ assessment, projectId }) =>
   };
 
   return (
-    <List>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {localCategories.map((category) => {
         const progress = getCategoryProgress(category.id);
         const worstClass = getWorstClassInCategory(category.id);
+        const subCategories = getSubCategories(category.id);
+        const backgroundColor = worstClass !== 'NA' && category.isEnabled
+          ? alpha(getClassColor(worstClass), 0.08)
+          : 'transparent';
+
         return (
-          <ListItem
+          <Paper
             key={category.id}
-            secondaryAction={
-              <Button
-                variant="contained"
-                onClick={() => handleToggle(category.id)}
-                sx={{
-                  minWidth: isMobile ? '90px' : '120px',
-                  fontSize: isMobile ? '0.75rem' : '0.875rem',
-                  backgroundColor: category.isEnabled ? 'success.main' : 'error.main',
-                  '&:hover': {
-                    backgroundColor: category.isEnabled ? 'success.dark' : 'error.dark',
-                  },
-                  position: 'absolute',
-                  right: isMobile ? 1 : 2,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  zIndex: 1
-                }}
-                startIcon={category.isEnabled ? <PowerIcon sx={{ fontSize: isMobile ? '1rem' : '1.25rem' }} /> : <PowerSettingsNewIcon sx={{ fontSize: isMobile ? '1rem' : '1.25rem' }} />}
-              >
-                {category.isEnabled ? 'Activée' : 'Désactivée'}
-              </Button>
-            }
-            disablePadding
-            sx={{ position: 'relative', pr: isMobile ? 8 : 10 }}
+            elevation={1}
+            sx={{
+              borderRadius: '12px',
+              overflow: 'hidden',
+              transition: 'all 0.2s ease-in-out',
+              opacity: category.isEnabled ? 1 : 0.7,
+              backgroundColor,
+              '&:hover': category.isEnabled ? {
+                transform: 'translateY(-2px)',
+                boxShadow: theme.shadows[2]
+              } : {}
+            }}
           >
-            <ListItemButton
+            <Box
               component={Link}
-              to={`/projects/${projectId}/category/${category.id}`}
-              disabled={!category.isEnabled}
+              to={category.isEnabled ? `/projects/${projectId}/category/${category.id}` : '#'}
               sx={{
-                backgroundColor: category.isEnabled ? 'transparent' : '#f5f5f5',
-                '&:hover': {
-                  backgroundColor: category.isEnabled ? 'rgba(0, 0, 0, 0.04)' : '#f5f5f5',
-                },
-                width: '100%',
-                pr: isMobile ? 8 : 10
+                display: 'flex',
+                textDecoration: 'none',
+                color: 'inherit',
+                backgroundColor: category.isEnabled ? 'transparent' : 'action.hover',
+                position: 'relative',
+                p: 2
               }}
             >
-              {getIcon(category.id)}
               <Box sx={{ 
-                flex: 1, 
-                ml: isMobile ? 1 : 2,
-                maxWidth: 'calc(100% - 120px)'
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                mr: 2
               }}>
+                {getIcon(category.id)}
+                <Chip
+                  label={worstClass}
+                  size="small"
+                  sx={worstClass !== 'NA' ? {
+                    backgroundColor: getClassColor(worstClass),
+                    color: getClassTextColor(worstClass),
+                    fontWeight: 600,
+                    minWidth: '45px'
+                  } : {
+                    backgroundColor: alpha(theme.palette.text.secondary, 0.1),
+                    color: theme.palette.text.secondary,
+                    fontSize: '0.7rem'
+                  }}
+                />
+              </Box>
+              
+              <Box sx={{ flex: 1, mr: isMobile ? 11 : 14 }}>
                 <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: 1, 
-                  flexWrap: 'wrap',
-                  mb: 0.5
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 0.5
                 }}>
-                  <Typography variant={isMobile ? "body1" : "subtitle1"}>
+                  <Typography 
+                    variant="subtitle1" 
+                    sx={{ 
+                      fontWeight: 500,
+                      color: category.isEnabled ? 'text.primary' : 'text.secondary'
+                    }}
+                  >
                     {category.name}
                   </Typography>
                   {category.isEnabled && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                        {progress.percentage}%
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                        ({worstClass})
-                      </Typography>
-                    </Box>
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        color: 'text.secondary',
+                        fontWeight: 500
+                      }}
+                    >
+                      {progress.completed} / {progress.total} évaluées
+                    </Typography>
                   )}
                 </Box>
-                <Typography 
-                  variant="body2" 
-                  color="text.secondary" 
-                  sx={{ 
-                    fontSize: isMobile ? '0.75rem' : '0.875rem',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    pr: 1
-                  }}
-                >
-                  {category.description}
-                </Typography>
-                <Box sx={{ mt: 1 }}>
-                  <LinearProgress
-                    variant="determinate"
-                    value={progress.percentage}
-                    color={progress.percentage === 100 ? "success" : "primary"}
-                    sx={{ height: isMobile ? 6 : 8, borderRadius: 4 }}
-                  />
-                </Box>
+
+                {category.isEnabled && (
+                  <Box sx={{ mt: 1 }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={progress.percentage}
+                      sx={{
+                        height: 6,
+                        borderRadius: 3,
+                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                        '& .MuiLinearProgress-bar': {
+                          backgroundColor: progress.percentage === 100 
+                            ? theme.palette.success.main 
+                            : theme.palette.primary.main
+                        }
+                      }}
+                    />
+                  </Box>
+                )}
               </Box>
-            </ListItemButton>
-          </ListItem>
+
+              <Button
+                variant="contained"
+                size="small"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleToggle(category.id);
+                }}
+                sx={{
+                  position: 'absolute',
+                  right: 16,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  minWidth: 'auto',
+                  px: 2,
+                  backgroundColor: category.isEnabled ? 'success.main' : 'error.main',
+                  '&:hover': {
+                    backgroundColor: category.isEnabled ? 'success.dark' : 'error.dark',
+                  }
+                }}
+                startIcon={
+                  category.isEnabled 
+                    ? <PowerIcon sx={{ fontSize: '1.25rem' }} /> 
+                    : <PowerSettingsNewIcon sx={{ fontSize: '1.25rem' }} />
+                }
+              >
+                {category.isEnabled ? 'ON' : 'OFF'}
+              </Button>
+            </Box>
+          </Paper>
         );
       })}
-    </List>
+    </Box>
   );
 };
 

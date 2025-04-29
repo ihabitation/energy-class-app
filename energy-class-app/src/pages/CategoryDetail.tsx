@@ -81,52 +81,75 @@ const CategoryDetail: React.FC = () => {
       )}
 
       <Paper 
-        elevation={3} 
+        elevation={2} 
         sx={{ 
-          p: 3, 
-          mb: 4,
-          backgroundColor: getClassColor(categoryClass),
-          color: getClassTextColor(categoryClass)
+          p: 2,
+          mb: 2,
+          backgroundColor: categoryClass !== 'NA' ? getClassColor(categoryClass) : 'background.paper',
+          color: categoryClass !== 'NA' ? getClassTextColor(categoryClass) : 'text.primary',
+          borderRadius: '12px',
+          transition: 'all 0.2s ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: theme.shadows[4]
+          }
         }}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Box sx={{ 
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 2
+        }}>
           <Box>
             <Typography 
-              variant="h4" 
-              component="h1" 
-              gutterBottom
+              variant="h6" 
+              component="h1"
               sx={{
-                fontSize: { xs: '1.75rem', sm: '2rem' },
-                fontWeight: 'normal',
-                color: 'inherit'
+                fontSize: '2.5rem',
+                fontWeight: 700,
+                mb: 0.5,
+                lineHeight: 1
               }}
             >
               {project.name}
             </Typography>
             <Typography 
-              variant="h5"
+              variant="body2"
               sx={{
-                fontSize: { xs: '1.5rem', sm: '1.75rem' },
-                fontWeight: 'medium',
                 opacity: 0.9,
-                color: 'inherit'
+                fontSize: '0.9rem',
+                mt: 1
               }}
             >
               {category.name}
             </Typography>
           </Box>
-          <Box sx={{ textAlign: 'center' }}>
+          <Box sx={{ 
+            textAlign: 'center',
+            minWidth: '100px'
+          }}>
             <Typography 
-              variant="h2" 
+              variant="h4" 
               component="div" 
               sx={{ 
-                fontWeight: 'bold',
-                fontSize: { xs: '2.5rem', sm: '3rem' }
+                fontWeight: 700,
+                fontSize: '2.5rem',
+                lineHeight: 1,
+                mb: 0.5
               }}
             >
               {categoryClass}
             </Typography>
-            <Typography variant="subtitle2">
+            <Typography 
+              variant="caption"
+              sx={{
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}
+            >
               Classe catégorie
             </Typography>
           </Box>

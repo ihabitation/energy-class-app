@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Paper, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Typography, Paper, useTheme, useMediaQuery, Fade } from '@mui/material';
 import { getClassColor, getClassTextColor } from '../utils/colors';
 import { calculateFinalClass } from '../services/energyClassService';
 import { useAssessment } from '../contexts/AssessmentContext';
@@ -21,34 +21,83 @@ const FinalClassDisplay: React.FC<{ projectId: string }> = ({ projectId }) => {
   if (!project) return null;
 
   return (
-    <Paper 
-      elevation={3} 
-      sx={{ 
-        p: 3, 
-        mb: 4,
-        backgroundColor: finalClass !== 'NA' ? getClassColor(finalClass) : 'background.paper',
-        color: finalClass !== 'NA' ? getClassTextColor(finalClass) : 'text.primary'
-      }}
-    >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box>
-          <Typography variant="h4" component="h1" gutterBottom>
-            {project.name}
-          </Typography>
-          <Typography variant="subtitle1">
-            {project.clientName}
-          </Typography>
+    <Fade in timeout={500}>
+      <Paper 
+        elevation={2} 
+        sx={{ 
+          p: 2,
+          mb: 2,
+          backgroundColor: finalClass !== 'NA' ? getClassColor(finalClass) : 'background.paper',
+          color: finalClass !== 'NA' ? getClassTextColor(finalClass) : 'text.primary',
+          borderRadius: '12px',
+          transition: 'all 0.2s ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: theme.shadows[4]
+          }
+        }}
+      >
+        <Box sx={{ 
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 2
+        }}>
+          <Box>
+            <Typography 
+              variant="h6" 
+              component="h1"
+              sx={{
+                fontSize: '2.5rem',
+                fontWeight: 700,
+                mb: 0.5,
+                lineHeight: 1
+              }}
+            >
+              {project.name}
+            </Typography>
+            <Typography 
+              variant="body2"
+              sx={{
+                opacity: 0.9,
+                fontSize: '0.9rem',
+                mt: 1
+              }}
+            >
+              {project.clientName}
+            </Typography>
+          </Box>
+          <Box sx={{ 
+            textAlign: 'center',
+            minWidth: '100px'
+          }}>
+            <Typography 
+              variant="h4" 
+              component="div" 
+              sx={{ 
+                fontWeight: 700,
+                fontSize: '2.5rem',
+                lineHeight: 1,
+                mb: 0.5
+              }}
+            >
+              {finalClass}
+            </Typography>
+            <Typography 
+              variant="caption"
+              sx={{
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}
+            >
+              Classe finale
+            </Typography>
+          </Box>
         </Box>
-        <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="h2" component="div" sx={{ fontWeight: 'bold' }}>
-            {finalClass}
-          </Typography>
-          <Typography variant="subtitle2">
-            Classe finale
-          </Typography>
-        </Box>
-      </Box>
-    </Paper>
+      </Paper>
+    </Fade>
   );
 };
 

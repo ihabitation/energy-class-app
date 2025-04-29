@@ -118,28 +118,75 @@ const ProjectDetail: React.FC = () => {
       <SupabaseTest />
 
       <Paper 
-        elevation={3} 
+        elevation={2} 
         sx={{ 
-          p: 3, 
-          mb: 4,
+          p: 2,
+          mb: 2,
           backgroundColor: finalClass !== 'NA' ? getClassColor(finalClass) : 'background.paper',
-          color: finalClass !== 'NA' ? getClassTextColor(finalClass) : 'text.primary'
+          color: finalClass !== 'NA' ? getClassTextColor(finalClass) : 'text.primary',
+          borderRadius: '12px',
+          transition: 'all 0.2s ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: theme.shadows[4]
+          }
         }}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ 
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 2
+        }}>
           <Box>
-            <Typography variant="h4" component="h1" gutterBottom>
+            <Typography 
+              variant="h6" 
+              component="h1"
+              sx={{
+                fontSize: '2.5rem',
+                fontWeight: 700,
+                mb: 0.5,
+                lineHeight: 1
+              }}
+            >
               {project.name}
             </Typography>
-            <Typography variant="subtitle1">
+            <Typography 
+              variant="body2"
+              sx={{
+                opacity: 0.9,
+                fontSize: '0.9rem',
+                mt: 1
+              }}
+            >
               {project.clientName}
             </Typography>
           </Box>
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h2" component="div" sx={{ fontWeight: 'bold' }}>
+          <Box sx={{ 
+            textAlign: 'center',
+            minWidth: '100px'
+          }}>
+            <Typography 
+              variant="h4" 
+              component="div" 
+              sx={{ 
+                fontWeight: 700,
+                fontSize: '2.5rem',
+                lineHeight: 1,
+                mb: 0.5
+              }}
+            >
               {finalClass}
             </Typography>
-            <Typography variant="subtitle2">
+            <Typography 
+              variant="caption"
+              sx={{
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}
+            >
               Classe finale
             </Typography>
           </Box>
@@ -148,16 +195,51 @@ const ProjectDetail: React.FC = () => {
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Informations générales
-            </Typography>
+          <Paper 
+            elevation={1}
+            sx={{ 
+              p: 2, 
+              mb: 2,
+              borderRadius: '12px',
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: theme.shadows[2]
+              }
+            }}
+          >
+            <Box 
+              sx={{
+                backgroundColor: 'grey.100',
+                p: 1.5,
+                borderRadius: '8px',
+                mb: 2
+              }}
+            >
+              <Typography 
+                variant="h6" 
+                sx={{
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  color: 'text.primary'
+                }}
+              >
+                Informations générales
+              </Typography>
+            </Box>
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <Typography variant="body1" color="textSecondary">
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'text.secondary',
+                    fontWeight: 500,
+                    mb: 0.5
+                  }}
+                >
                   Description
                 </Typography>
-                <Typography>
+                <Typography variant="body1">
                   {project.description || 'Aucune description'}
                 </Typography>
               </Grid>
@@ -165,10 +247,17 @@ const ProjectDetail: React.FC = () => {
                 <Divider sx={{ my: 2 }} />
               </Grid>
               <Grid item xs={12}>
-                <Typography variant="body1" color="textSecondary">
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'text.secondary',
+                    fontWeight: 500,
+                    mb: 0.5
+                  }}
+                >
                   Adresse
                 </Typography>
-                <Typography>
+                <Typography variant="body1">
                   {project.address.street}
                   <br />
                   {project.address.postalCode} {project.address.city}
@@ -179,40 +268,95 @@ const ProjectDetail: React.FC = () => {
             </Grid>
           </Paper>
 
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Informations techniques
-            </Typography>
+          <Paper 
+            elevation={1}
+            sx={{ 
+              p: 2,
+              borderRadius: '12px',
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: theme.shadows[2]
+              }
+            }}
+          >
+            <Box 
+              sx={{
+                backgroundColor: 'grey.100',
+                p: 1.5,
+                borderRadius: '8px',
+                mb: 2
+              }}
+            >
+              <Typography 
+                variant="h6" 
+                sx={{
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  color: 'text.primary'
+                }}
+              >
+                Informations techniques
+              </Typography>
+            </Box>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <Typography variant="body1" color="textSecondary">
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'text.secondary',
+                    fontWeight: 500,
+                    mb: 0.5
+                  }}
+                >
                   Type de bâtiment
                 </Typography>
-                <Typography>
+                <Typography variant="body1">
                   {project.metadata.buildingType}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Typography variant="body1" color="textSecondary">
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'text.secondary',
+                    fontWeight: 500,
+                    mb: 0.5
+                  }}
+                >
                   Année de construction
                 </Typography>
-                <Typography>
+                <Typography variant="body1">
                   {project.metadata.constructionYear || 'Non spécifié'}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Typography variant="body1" color="textSecondary">
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'text.secondary',
+                    fontWeight: 500,
+                    mb: 0.5
+                  }}
+                >
                   Surface totale
                 </Typography>
-                <Typography>
+                <Typography variant="body1">
                   {project.metadata.totalArea ? `${project.metadata.totalArea} m²` : 'Non spécifié'}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Typography variant="body1" color="textSecondary">
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'text.secondary',
+                    fontWeight: 500,
+                    mb: 0.5
+                  }}
+                >
                   Nombre d'étages
                 </Typography>
-                <Typography>
+                <Typography variant="body1">
                   {project.metadata.floors || 'Non spécifié'}
                 </Typography>
               </Grid>
@@ -221,12 +365,30 @@ const ProjectDetail: React.FC = () => {
 
           <Box mt={3}>
             <Paper sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6">
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  backgroundColor: 'grey.100',
+                  p: 1.5,
+                  borderRadius: '8px',
+                  mb: 2
+                }}
+              >
+                <Typography 
+                  variant="h6"
+                  sx={{
+                    fontSize: '1.1rem',
+                    fontWeight: 600,
+                    color: 'text.primary'
+                  }}
+                >
                   Solutions techniques
                 </Typography>
                 <Button
                   variant="outlined"
+                  size="small"
                   onClick={() => setShowTechnicalSolutions(!showTechnicalSolutions)}
                 >
                   {showTechnicalSolutions ? 'Masquer' : 'Afficher'}
@@ -246,9 +408,25 @@ const ProjectDetail: React.FC = () => {
 
         <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              État du projet
-            </Typography>
+            <Box 
+              sx={{
+                backgroundColor: 'grey.100',
+                p: 1.5,
+                borderRadius: '8px',
+                mb: 2
+              }}
+            >
+              <Typography 
+                variant="h6" 
+                sx={{
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  color: 'text.primary'
+                }}
+              >
+                État du projet
+              </Typography>
+            </Box>
             <Box sx={{ mb: 2 }}>
               <Chip
                 label={statusLabels[project.status]}
@@ -270,9 +448,25 @@ const ProjectDetail: React.FC = () => {
           </Paper>
 
           <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Dates importantes
-            </Typography>
+            <Box 
+              sx={{
+                backgroundColor: 'grey.100',
+                p: 1.5,
+                borderRadius: '8px',
+                mb: 2
+              }}
+            >
+              <Typography 
+                variant="h6" 
+                sx={{
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  color: 'text.primary'
+                }}
+              >
+                Dates importantes
+              </Typography>
+            </Box>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <Typography variant="body1" color="textSecondary">

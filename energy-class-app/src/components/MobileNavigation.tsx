@@ -17,6 +17,7 @@ import AirIcon from '@mui/icons-material/Air';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import BlindsIcon from '@mui/icons-material/Blinds';
 import RouterIcon from '@mui/icons-material/Router';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigation } from '../contexts/NavigationContext';
 
@@ -63,6 +64,13 @@ const MobileNavigation: React.FC = () => {
     }
   };
 
+  const handleBackToCategory = () => {
+    if (isSubCategoryView && subCategoryMatch?.params) {
+      const { projectId, categoryId } = subCategoryMatch.params;
+      navigate(`/projects/${projectId}/category/${categoryId}`);
+    }
+  };
+
   const getCurrentValue = () => {
     if (isProjectList) return 0;
     if (isAssessmentView) return 2;
@@ -70,33 +78,9 @@ const MobileNavigation: React.FC = () => {
     return 1;
   };
 
-  const handleChange = (event: any, newValue: number) => {
-    switch (newValue) {
-      case 0:
-        navigate('/projects');
-        break;
-      case 1:
-        if (currentProjectId) {
-          navigate(`/projects/${currentProjectId}`);
-        }
-        break;
-      case 2:
-        if (currentProjectId) {
-          // Si on n'est pas déjà sur la vue d'évaluation, y aller
-          if (!isAssessmentView) {
-            navigate(`/projects/${currentProjectId}/assessment`);
-          }
-        }
-        break;
-      case 3:
-        // Ne rien faire si on est déjà sur la catégorie/sous-catégorie
-        break;
-    }
-  };
-
   const getActionLabel = () => {
     if (isSubCategoryView) {
-      return currentCategory || "Catégorie";
+      return "Retour";
     }
     if (isCategoryView) {
       return currentCategory || "Catégorie";
@@ -127,7 +111,28 @@ const MobileNavigation: React.FC = () => {
         >
           <BottomNavigation
             value={getCurrentValue()}
-            onChange={handleChange}
+            onChange={(event, newValue) => {
+              switch (newValue) {
+                case 0:
+                  navigate('/projects');
+                  break;
+                case 1:
+                  if (currentProjectId) {
+                    navigate(`/projects/${currentProjectId}`);
+                  }
+                  break;
+                case 2:
+                  if (currentProjectId) {
+                    navigate(`/projects/${currentProjectId}/assessment`);
+                  }
+                  break;
+                case 3:
+                  if (isSubCategoryView) {
+                    handleBackToCategory();
+                  }
+                  break;
+              }
+            }}
             sx={{
               height: 65,
               '& .MuiBottomNavigationAction-root': {
@@ -153,13 +158,13 @@ const MobileNavigation: React.FC = () => {
               <BottomNavigationAction 
                 label="Évaluation"
                 icon={<AssessmentIcon />}
-                onClick={() => navigate(`/projects/${currentProjectId}/assessment`)}
               />
             )}
             {(isCategoryView || isSubCategoryView) && (
               <BottomNavigationAction 
-                label={currentCategory || "Catégorie"}
-                icon={getCategoryIcon(currentCategory)}
+                label={getActionLabel()}
+                icon={isSubCategoryView ? <ArrowBackIcon /> : getCategoryIcon(currentCategory)}
+                onClick={isSubCategoryView ? handleBackToCategory : undefined}
               />
             )}
           </BottomNavigation>
