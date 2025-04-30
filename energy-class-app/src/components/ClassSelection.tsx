@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Grid, Typography, Box, Tooltip, Paper, Card, CardContent, CardActionArea, useTheme, useMediaQuery, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { Grid, Typography, Box, Dialog, DialogTitle, DialogContent, DialogActions, Button, Card, CardActionArea, useTheme, useMediaQuery, Tooltip, Paper } from '@mui/material';
 import { SubCategory } from '../types/energyClass';
 import { getClassColor, getClassTextColor } from '../utils/colors';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useAssessment } from '../contexts/AssessmentContext';
 import { useNavigate } from 'react-router-dom';
+import { alpha } from '@mui/material/styles';
+import { useProjects } from '../contexts/ProjectContext';
+import { Project } from '../types/project';
 
 interface ClassSelectionProps {
   subCategoryId: string;
@@ -37,6 +40,10 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({
     description: string;
   } | null>(null);
 
+  // Récupérer le projet depuis le contexte
+  const { projects } = useProjects();
+  const project = projects.find(p => p.id === projectId);
+
   // Filtrer les classes disponibles en fonction des options de la sous-catégorie
   const availableClasses = ['NA', 'A', 'B', 'C', 'D'].filter(classType => {
     if (classType === 'NA') return true; // Toujours garder l'option NA
@@ -54,7 +61,7 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({
     if (classData) {
       return {
         short: classData.description.split('.')[0] + '.',
-        full: `${classData.description}\n\nImpact : ${classData.impact}`
+        full: `${classData.description}\n\n\nImpact : ${classData.impact}`
       };
     }
     return {
@@ -99,190 +106,163 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({
   };
 
   return (
-    <Box>
-      <Paper 
-        elevation={2} 
+    <Box sx={{ p: isMobile ? 2 : 3 }}>
+      <Typography 
+        variant="h6" 
+        component="h1" 
         sx={{ 
-          p: isMobile ? 1.5 : 3, 
-          mb: isMobile ? 2 : 3,
-          position: 'sticky',
-          top: 0,
-          zIndex: 1,
-          backgroundColor: 'background.paper'
+          fontSize: '2.5rem',
+          fontWeight: 700,
+          mb: 0.5,
+          lineHeight: 1
         }}
       >
+        {options?.find(opt => opt.id === subCategoryId)?.name}
+      </Typography>
+      {options?.find(opt => opt.id === subCategoryId)?.description && (
         <Typography 
-          variant={isMobile ? "h6" : "h5"} 
-          sx={{
-            fontWeight: 600,
-            color: theme => theme.palette.primary.main,
-            pb: 1,
-            borderBottom: '2px solid',
-            borderColor: theme => theme.palette.divider,
-            mb: 2,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
-          }}
-        >
-          {options?.find(opt => opt.id === subCategoryId)?.name}
-        </Typography>
-        <Typography 
-          variant="body1" 
-          paragraph
-          sx={{
-            display: isMobile ? '-webkit-box' : 'block',
-            WebkitLineClamp: isMobile ? 2 : 'none',
-            WebkitBoxOrient: 'vertical',
-            overflow: isMobile ? 'hidden' : 'visible',
-            mb: isMobile ? 1 : 2,
+          variant="body1"
+          sx={{ 
+            mb: 4,
+            fontSize: '1rem',
             color: theme => theme.palette.text.secondary
           }}
         >
           {options?.find(opt => opt.id === subCategoryId)?.description}
         </Typography>
-        <Typography 
-          variant="body2" 
-          color="text.secondary"
-          sx={{ fontSize: isMobile ? '0.75rem' : 'inherit' }}
-        >
-          {isMobile ? "Appuyez une fois pour voir les détails, deux fois pour sélectionner" : "Survolez les classes pour plus de détails"}
-        </Typography>
-      </Paper>
+      )}
 
-      <Grid container spacing={isMobile ? 1.5 : 2}>
+      <Grid container spacing={isMobile ? 2 : 3}>
         {availableClasses.map((energyClass) => {
           const description = getClassDescription(energyClass);
           const isSelected = classType === energyClass;
           const isDetailSelected = selectedDetail?.class === energyClass;
           
-          const cardContent = (
-            <Box sx={{ 
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column'
-            }}>
-              <Box sx={{ 
-                position: 'relative',
-                pt: isMobile ? 1.5 : 2,
-                pb: isMobile ? 1 : 1,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}>
-                <Typography 
-                  variant={isMobile ? "h4" : "h2"}
-                  component="div" 
-                  align="center"
-                  sx={{
-                    fontWeight: 'bold',
-                    lineHeight: 1
-                  }}
-                >
-                  {energyClass}
-                </Typography>
-                {isSelected && (
-                  <CheckCircleIcon 
-                    sx={{ 
-                      fontSize: isMobile ? '1.25rem' : '2rem',
-                      color: theme => theme.palette.primary.main,
-                      position: 'absolute',
-                      top: isMobile ? 4 : 4,
-                      right: isMobile ? 4 : 4
-                    }} 
-                  />
-                )}
-              </Box>
-              <Box sx={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                p: isMobile ? 1 : 2,
-                pt: 0
-              }}>
-                <Typography 
-                  variant="body2"
-                  align="center"
-                  sx={{
-                    width: '100%',
-                    opacity: 0.9,
-                    fontSize: isMobile ? '0.75rem' : '0.875rem',
-                    display: isMobile ? 'block' : '-webkit-box',
-                    WebkitLineClamp: isMobile ? 'none' : 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: isMobile ? 'visible' : 'hidden',
-                    whiteSpace: isMobile ? 'normal' : 'pre-line'
-                  }}
-                >
-                  {description.short}
-                </Typography>
-              </Box>
-            </Box>
-          );
-          
           return (
             <Grid item xs={6} sm={4} md={2.4} key={energyClass}>
-              {!isMobile ? (
-                <Tooltip
-                  title={description.full}
-                  placement="top"
-                  arrow
-                  enterDelay={200}
-                  leaveDelay={200}
-                >
-                  <Card 
-                    sx={{ 
-                      height: '100%',
-                      minHeight: '140px',
-                      backgroundColor: getClassColor(energyClass),
-                      color: getClassTextColor(energyClass),
-                      transition: 'all 0.2s',
-                      position: 'relative',
-                      border: isSelected ? '2px solid' : 'none',
-                      borderColor: isSelected ? theme => theme.palette.primary.main : 'transparent',
-                      transform: isSelected ? 'scale(1.02)' : 'scale(1)',
-                      '&:hover': {
-                        transform: 'scale(1.02)',
-                        backgroundColor: getClassColor(energyClass),
-                        opacity: 0.9,
-                      }
-                    }}
-                  >
-                    <CardActionArea 
-                      onClick={() => handleClassClick(energyClass)}
-                      sx={{ height: '100%' }}
-                    >
-                      {cardContent}
-                    </CardActionArea>
-                  </Card>
-                </Tooltip>
-              ) : (
+              <Tooltip 
+                title={
+                  !isMobile ? (
+                    <Box sx={{ p: 1 }}>
+                      <Typography variant="h6" sx={{ mb: 1 }}>
+                        Classe {energyClass}
+                      </Typography>
+                      <Typography sx={{ whiteSpace: 'pre-line' }}>
+                        {description.full}
+                      </Typography>
+                    </Box>
+                  ) : ''
+                }
+                placement="top"
+                arrow
+                enterDelay={200}
+                leaveDelay={200}
+                sx={{
+                  maxWidth: '300px'
+                }}
+              >
                 <Card 
                   sx={{ 
-                    height: '100%',
-                    minHeight: '120px',
+                    height: isMobile ? '140px' : '100%',
+                    minHeight: isMobile ? 'auto' : '140px',
                     backgroundColor: getClassColor(energyClass),
                     color: getClassTextColor(energyClass),
-                    transition: 'all 0.2s',
+                    transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border 0.2s ease-in-out',
                     position: 'relative',
-                    border: isSelected || isDetailSelected ? '2px solid' : 'none',
-                    borderColor: theme => theme.palette.primary.main,
-                    transform: (isSelected || isDetailSelected) ? 'scale(1.02)' : 'scale(1)',
+                    borderRadius: '12px',
+                    border: (isSelected || isDetailSelected) ? `2px solid ${theme.palette.grey[900]}` : 'none',
+                    transform: (isSelected || isDetailSelected) ? 'translateY(-2px)' : 'none',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: theme => theme.shadows[4],
+                      border: `2px solid ${theme.palette.grey[800]}`
+                    }
                   }}
                 >
                   <CardActionArea 
                     onClick={() => handleClassClick(energyClass)}
-                    sx={{ height: '100%' }}
+                    sx={{ 
+                      height: '100%',
+                      display: 'flex',
+                      '&:hover': {
+                        backgroundColor: 'transparent'
+                      }
+                    }}
                   >
-                    {cardContent}
+                    <Box sx={{ 
+                      height: '100%',
+                      width: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      p: isMobile ? '16px' : 2,
+                      justifyContent: 'space-between'
+                    }}>
+                      <Box sx={{ 
+                        position: 'relative',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        mb: isMobile ? 1 : 1
+                      }}>
+                        <Typography 
+                          variant={isMobile ? "h4" : "h2"}
+                          component="div" 
+                          align="center"
+                          sx={{
+                            fontWeight: 'bold',
+                            lineHeight: 1,
+                            color: '#FFFFFF',
+                            textShadow: '0px 1px 2px rgba(0,0,0,0.2)'
+                          }}
+                        >
+                          {energyClass}
+                        </Typography>
+                        {isSelected && (
+                          <CheckCircleIcon 
+                            sx={{ 
+                              fontSize: isMobile ? '1.5rem' : '2rem',
+                              color: '#FFFFFF',
+                              position: 'absolute',
+                              top: 0,
+                              right: 0
+                            }} 
+                          />
+                        )}
+                      </Box>
+                      <Box sx={{
+                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        minHeight: isMobile ? '60px' : '80px'
+                      }}>
+                        <Typography 
+                          variant="body2"
+                          align="center"
+                          sx={{
+                            width: '100%',
+                            fontSize: isMobile ? '0.8rem' : '0.875rem',
+                            color: '#FFFFFF',
+                            textShadow: '0px 1px 1px rgba(0,0,0,0.1)',
+                            lineHeight: 1.2,
+                            display: '-webkit-box',
+                            WebkitLineClamp: isMobile ? 3 : 4,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            m: 0
+                          }}
+                        >
+                          {description.short}
+                        </Typography>
+                      </Box>
+                    </Box>
                   </CardActionArea>
                 </Card>
-              )}
+              </Tooltip>
             </Grid>
           );
         })}
       </Grid>
 
-      {/* Dialog pour afficher les détails sur mobile */}
       <Dialog
         open={!!selectedDetail}
         onClose={handleCloseDetail}
@@ -293,7 +273,7 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({
           Classe {selectedDetail?.class}
         </DialogTitle>
         <DialogContent>
-          <Typography>
+          <Typography sx={{ whiteSpace: 'pre-line' }}>
             {selectedDetail?.description}
           </Typography>
         </DialogContent>
