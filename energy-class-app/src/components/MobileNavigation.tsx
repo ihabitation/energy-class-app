@@ -5,7 +5,9 @@ import {
   BottomNavigation, 
   BottomNavigationAction,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Avatar,
+  Box
 } from '@mui/material';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import AssessmentIcon from '@mui/icons-material/Assessment';
@@ -20,11 +22,13 @@ import RouterIcon from '@mui/icons-material/Router';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigation } from '../contexts/NavigationContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const MobileNavigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentProjectId, currentProjectName, currentCategory } = useNavigation();
+  const { user } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -131,6 +135,13 @@ const MobileNavigation: React.FC = () => {
                     handleBackToCategory();
                   }
                   break;
+                case 4:
+                  if (user) {
+                    navigate('/admin');
+                  } else {
+                    navigate('/login');
+                  }
+                  break;
               }
             }}
             sx={{
@@ -167,6 +178,20 @@ const MobileNavigation: React.FC = () => {
                 onClick={isSubCategoryView ? handleBackToCategory : undefined}
               />
             )}
+            <BottomNavigationAction
+              label={user ? "Profil" : "Connexion"}
+              icon={
+                <Avatar
+                  sx={{ 
+                    width: 24, 
+                    height: 24,
+                    bgcolor: user ? theme.palette.primary.main : 'grey.400'
+                  }}
+                >
+                  {user ? user.email?.[0].toUpperCase() : '?'}
+                </Avatar>
+              }
+            />
           </BottomNavigation>
         </Paper>
       </motion.div>

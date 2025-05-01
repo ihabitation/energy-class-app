@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { useParams, useLocation } from 'react-router-dom';
 import { useAssessment } from './AssessmentContext';
 import { useProjects } from './ProjectContext';
+import { useAuth } from './AuthContext';
 
 interface CategoryContextType {
   categories: Category[];
@@ -23,6 +24,7 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const location = useLocation();
   const { updateGlobalResults } = useAssessment();
   const { projects } = useProjects();
+  const { isAdmin } = useAuth();
 
   // Extraire le projectId de l'URL
   const pathProjectId = location.pathname.split('/')[2];
@@ -39,46 +41,14 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       try {
         const initialCategories = getCategories().map(cat => ({ ...cat, isEnabled: false }));
+        const adminStatus = await isAdmin();
 
-        // Si nous sommes sur la page d'accueil, on charge les états pour tous les projets
-        if (location.pathname === '/') {
-          // Pour chaque projet, charger ses états de catégories
-          const allResults = await Promise.all(
-            projects.map(async (project) => {
-              const { data: results, error } = await supabase
-                .from('global_results')
-                .select('*')
-                .eq('project_id', project.id);
-
-              if (error) {
-                console.error(`Erreur lors du chargement des états pour le projet ${project.id}:`, error);
-                return [];
-              }
-
-              return results || [];
-            })
-          );
-
-          // Fusionner tous les résultats
-          const mergedResults = allResults.flat();
-
-          const categoriesWithStates = initialCategories.map(category => {
-            const result = mergedResults.find(r => r.category_id === category.id);
-            const isEnabled = result !== undefined ? result.is_enabled : false;
-            return {
-              ...category,
-              isEnabled
-            };
-          });
-
-          if (isMounted) {
-            setCategories(categoriesWithStates);
-            setIsLoading(false);
-          }
-          return;
-        }
-
-        if (!currentProjectId) {
+        // Vérifier si le projectId est valide ou s'il s'agit d'un cas spécial
+        if (currentProjectId && 
+            currentProjectId !== 'callback' && 
+            currentProjectId !== 'new' && 
+            !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(currentProjectId)) {
+          console.error('ID de projet invalide:', currentProjectId);
           if (isMounted) {
             setCategories(initialCategories);
             setIsLoading(false);
@@ -86,6 +56,24 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           return;
         }
 
+        // Si nous sommes sur la page d'accueil ou dans un cas spécial, initialiser avec les catégories par défaut
+        if (location.pathname === '/' || currentProjectId === 'callback' || currentProjectId === 'new') {
+          if (isMounted) {
+            setCategories(initialCategories);
+            setIsLoading(false);
+          }
+          return;
+        }
+
+        if (!currentProjectId || currentProjectId === 'new') {
+          if (isMounted) {
+            setCategories(initialCategories);
+            setIsLoading(false);
+          }
+          return;
+        }
+
+        // Charger les états des catégories depuis Supabase
         const { data: results, error } = await supabase
           .from('global_results')
           .select('*')
@@ -98,6 +86,69 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setIsLoading(false);
           }
           return;
+        }
+
+        // Si aucun résultat n'existe pour ce projet, créer les entrées par défaut
+        if (!results || results.length === 0) {
+          console.log('Aucune catégorie trouvée, initialisation des catégories par défaut...');
+          try {
+            // Vérifier d'abord si des entrées existent déjà
+            const { data: existingResults, error: checkError } = await supabase
+              .from('global_results')
+              .select('category_id')
+              .eq('project_id', currentProjectId);
+
+            if (checkError) {
+              console.error('Erreur lors de la vérification des catégories existantes:', checkError);
+              throw checkError;
+            }
+
+            // Si aucune entrée n'existe, créer les entrées par défaut
+            if (!existingResults || existingResults.length === 0) {
+              const defaultEntries = initialCategories.map(category => ({
+                project_id: currentProjectId,
+                category_id: category.id,
+                is_enabled: true,
+                last_updated: new Date().toISOString()
+              }));
+
+              const { error: insertError } = await supabase
+                .from('global_results')
+                .insert(defaultEntries);
+
+              if (insertError) {
+                console.error('Erreur lors de l\'initialisation des résultats:', insertError);
+                throw insertError;
+              }
+
+              console.log('Catégories initialisées avec succès');
+            } else {
+              console.log('Des catégories existent déjà pour ce projet');
+            }
+
+            // Dans tous les cas, initialiser les catégories comme activées
+            if (isMounted) {
+              setCategories(initialCategories.map(cat => ({ ...cat, isEnabled: true })));
+              setIsLoading(false);
+              return;
+            }
+          } catch (error) {
+            console.error('Erreur lors de l\'initialisation des catégories:', error);
+            // En cas d'erreur, on continue avec les catégories existantes
+            if (results && results.length > 0) {
+              const categoriesWithStates = initialCategories.map(category => {
+                const result = results.find(r => r.category_id === category.id);
+                return {
+                  ...category,
+                  isEnabled: result?.is_enabled ?? false
+                };
+              });
+              if (isMounted) {
+                setCategories(categoriesWithStates);
+                setIsLoading(false);
+              }
+            }
+          }
         }
 
         const categoriesWithStates = initialCategories.map(category => {
@@ -134,7 +185,7 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return () => {
       isMounted = false;
     };
-  }, [currentProjectId, location.pathname, updateGlobalResults, projects]);
+  }, [currentProjectId, location.pathname, updateGlobalResults, projects, isAdmin]);
 
   const getEnabledCategories = (projectId: string): string[] => {
     return categories

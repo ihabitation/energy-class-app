@@ -115,14 +115,14 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({
           fontWeight: 700,
           mb: 0.5,
           lineHeight: 1
-        }}
-      >
-        {options?.find(opt => opt.id === subCategoryId)?.name}
-      </Typography>
+          }}
+        >
+          {options?.find(opt => opt.id === subCategoryId)?.name}
+        </Typography>
       {options?.find(opt => opt.id === subCategoryId)?.description && (
         <Typography 
-          variant="body1"
-          sx={{ 
+          variant="body1" 
+          sx={{
             mb: 4,
             fontSize: '1rem',
             color: theme => theme.palette.text.secondary
@@ -189,72 +189,72 @@ const ClassSelection: React.FC<ClassSelectionProps> = ({
                       }
                     }}
                   >
-                    <Box sx={{ 
-                      height: '100%',
+            <Box sx={{ 
+              height: '100%',
                       width: '100%',
-                      display: 'flex',
+              display: 'flex',
                       flexDirection: 'column',
                       p: isMobile ? '16px' : 2,
                       justifyContent: 'space-between'
-                    }}>
-                      <Box sx={{ 
-                        position: 'relative',
-                        display: 'flex',
-                        justifyContent: 'center',
+            }}>
+              <Box sx={{ 
+                position: 'relative',
+                display: 'flex',
+                justifyContent: 'center',
                         alignItems: 'center',
                         mb: isMobile ? 1 : 1
-                      }}>
-                        <Typography 
-                          variant={isMobile ? "h4" : "h2"}
-                          component="div" 
-                          align="center"
-                          sx={{
-                            fontWeight: 'bold',
+              }}>
+                <Typography 
+                  variant={isMobile ? "h4" : "h2"}
+                  component="div" 
+                  align="center"
+                  sx={{
+                    fontWeight: 'bold',
                             lineHeight: 1,
                             color: '#FFFFFF',
                             textShadow: '0px 1px 2px rgba(0,0,0,0.2)'
-                          }}
-                        >
-                          {energyClass}
-                        </Typography>
-                        {isSelected && (
-                          <CheckCircleIcon 
-                            sx={{ 
+                  }}
+                >
+                  {energyClass}
+                </Typography>
+                {isSelected && (
+                  <CheckCircleIcon 
+                    sx={{ 
                               fontSize: isMobile ? '1.5rem' : '2rem',
                               color: '#FFFFFF',
-                              position: 'absolute',
+                      position: 'absolute',
                               top: 0,
                               right: 0
-                            }} 
-                          />
-                        )}
-                      </Box>
-                      <Box sx={{
-                        flex: 1,
-                        display: 'flex',
-                        alignItems: 'center',
+                    }} 
+                  />
+                )}
+              </Box>
+              <Box sx={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
                         minHeight: isMobile ? '60px' : '80px'
-                      }}>
-                        <Typography 
-                          variant="body2"
-                          align="center"
-                          sx={{
-                            width: '100%',
+              }}>
+                <Typography 
+                  variant="body2"
+                  align="center"
+                  sx={{
+                    width: '100%',
                             fontSize: isMobile ? '0.8rem' : '0.875rem',
                             color: '#FFFFFF',
                             textShadow: '0px 1px 1px rgba(0,0,0,0.1)',
                             lineHeight: 1.2,
                             display: '-webkit-box',
                             WebkitLineClamp: isMobile ? 3 : 4,
-                            WebkitBoxOrient: 'vertical',
+                    WebkitBoxOrient: 'vertical',
                             overflow: 'hidden',
                             m: 0
-                          }}
-                        >
-                          {description.short}
-                        </Typography>
-                      </Box>
-                    </Box>
+                  }}
+                >
+                  {description.short}
+                </Typography>
+              </Box>
+            </Box>
                   </CardActionArea>
                 </Card>
               </Tooltip>

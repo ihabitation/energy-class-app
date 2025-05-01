@@ -66,18 +66,18 @@ const CategoryDetail: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {!isMobile && (
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate(`/projects/${projectId}/assessment`)}
-          sx={{ 
-            mb: 4,
-            color: 'primary.main',
-            textTransform: 'none',
-            fontSize: '1rem'
-          }}
-        >
-          RETOUR À L'ÉVALUATION
-        </Button>
+      <Button
+        startIcon={<ArrowBackIcon />}
+        onClick={() => navigate(`/projects/${projectId}/assessment`)}
+        sx={{ 
+          mb: 4,
+          color: 'primary.main',
+          textTransform: 'none',
+          fontSize: '1rem'
+        }}
+      >
+        RETOUR À L'ÉVALUATION
+      </Button>
       )}
 
       <Paper 
@@ -104,7 +104,7 @@ const CategoryDetail: React.FC = () => {
           <Box>
             <Typography 
               variant="h6" 
-              component="h1"
+              component="h1" 
               sx={{
                 fontSize: '2.5rem',
                 fontWeight: 700,

@@ -3,6 +3,7 @@ export interface Project {
   name: string;
   description?: string;
   clientName: string;
+  user_id: string;
   address: {
     street: string;
     city: string;

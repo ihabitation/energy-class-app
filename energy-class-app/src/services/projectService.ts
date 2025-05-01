@@ -7,12 +7,19 @@ type AssessmentRow = Database['public']['Tables']['assessments']['Row'];
 
 class ProjectService {
   async createProject(projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>): Promise<Project> {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      throw new Error('Utilisateur non connecté');
+    }
+
     const { data: project, error } = await supabase
       .from('projects')
       .insert({
         name: projectData.name,
         description: projectData.description || null,
         client_name: projectData.clientName,
+        user_id: session.user.id,
         address: {
           street: projectData.address.street,
           city: projectData.address.city,
@@ -37,6 +44,12 @@ class ProjectService {
   }
 
   async getProject(id: string): Promise<Project | null> {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      throw new Error('Utilisateur non connecté');
+    }
+
     const { data: project, error } = await supabase
       .from('projects')
       .select(`
@@ -44,6 +57,7 @@ class ProjectService {
         assessments (*)
       `)
       .eq('id', id)
+      .eq('user_id', session.user.id)
       .single();
 
     if (error) return null;
@@ -53,6 +67,12 @@ class ProjectService {
   }
 
   async updateProject(id: string, updates: Partial<Omit<Project, 'id' | 'createdAt'>>): Promise<Project | null> {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      throw new Error('Utilisateur non connecté');
+    }
+
     const { data: project, error } = await supabase
       .from('projects')
       .update({
@@ -75,6 +95,7 @@ class ProjectService {
         }
       })
       .eq('id', id)
+      .eq('user_id', session.user.id)
       .select(`
         *,
         assessments (*)
@@ -86,6 +107,12 @@ class ProjectService {
   }
 
   async deleteProject(id: string): Promise<boolean> {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      throw new Error('Utilisateur non connecté');
+    }
+
     // Supprimer d'abord les entrées dans global_results
     const { error: globalResultsError } = await supabase
       .from('global_results')
@@ -101,18 +128,26 @@ class ProjectService {
     const { error: projectError } = await supabase
       .from('projects')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', session.user.id);
 
     return !projectError;
   }
 
   async getProjects(filters?: ProjectFilters): Promise<ProjectSummary[]> {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      throw new Error('Utilisateur non connecté');
+    }
+
     let query = supabase
       .from('projects')
       .select(`
         *,
         assessments (*)
-      `);
+      `)
+      .eq('user_id', session.user.id);
 
     if (filters) {
       if (filters.status) {
@@ -207,6 +242,7 @@ class ProjectService {
       name: row.name,
       description: row.description || undefined,
       clientName: row.client_name,
+      user_id: row.user_id,
       address: {
         street: row.address.street,
         city: row.address.city,

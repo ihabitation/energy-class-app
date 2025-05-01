@@ -14,11 +14,13 @@ import {
 } from '@mui/material';
 import { useProjects } from '../contexts/ProjectContext';
 import { Project, ProjectStatus } from '../types/project';
+import { useAuth } from '../contexts/AuthContext';
 
 const initialProject: Omit<Project, 'id' | 'createdAt' | 'updatedAt'> = {
   name: '',
   description: '',
   clientName: '',
+  user_id: '',
   address: {
     street: '',
     city: '',
@@ -43,6 +45,7 @@ const ProjectForm: React.FC = () => {
   const navigate = useNavigate();
   const { projectId } = useParams<{ projectId: string }>();
   const { createProject, updateProject, getProject } = useProjects();
+  const { user } = useAuth();
   const [formData, setFormData] = useState(initialProject);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -62,11 +65,16 @@ const ProjectForm: React.FC = () => {
         } finally {
           setLoading(false);
         }
+      } else {
+        setFormData({
+          ...initialProject,
+          user_id: user?.id || '',
+        });
       }
     };
 
     loadProject();
-  }, [projectId, getProject]);
+  }, [projectId, getProject, user]);
 
   const handleChange = (field: string, value: any) => {
     setFormData((prev) => {

@@ -21,6 +21,12 @@ import {
   DialogActions,
   Paper,
   Tooltip,
+  CircularProgress,
+  Alert,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Divider
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -34,6 +40,9 @@ import { useAssessment } from '../contexts/AssessmentContext';
 import { calculateFinalClass } from '../services/energyClassService';
 import { getSubCategories } from '../services/energyClassService';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import PersonIcon from '@mui/icons-material/Person';
 
 type EnergyClass = 'A' | 'B' | 'C' | 'D' | 'NA';
 
@@ -41,7 +50,27 @@ interface ProjectCategories {
   [projectId: string]: string[];
 }
 
-const ProjectList: React.FC = () => {
+interface Project {
+  id: string;
+  name: string;
+  created_at: string;
+  user_id: string;
+}
+
+interface UserProjects {
+  user_id: string;
+  email: string;
+  display_name?: string;
+  projects: any[];
+}
+
+interface UserDetails {
+  user_id: string;
+  email: string;
+  display_name?: string;
+}
+
+export const ProjectList: React.FC = () => {
   const navigate = useNavigate();
   const { projectId } = useParams<{ projectId: string }>();
   const { projects, loading, error, filters, setFilters, deleteProject } = useProjects();
@@ -51,6 +80,10 @@ const ProjectList: React.FC = () => {
   const { categories } = useCategories();
   const { getAssessment } = useAssessment();
   const [projectCategories, setProjectCategories] = useState<ProjectCategories>({});
+  const { user, isAdmin } = useAuth();
+  const [userProjects, setUserProjects] = useState<UserProjects[]>([]);
+  const [expandedUsers, setExpandedUsers] = useState<string[]>([]);
+  const [isAdminView, setIsAdminView] = useState(false);
 
   // Fonction pour récupérer les catégories activées depuis global_results
   const getProjectEnabledCategories = async (projectId: string): Promise<string[]> => {
@@ -300,6 +333,116 @@ const ProjectList: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const checkAdminAndLoadProjects = async () => {
+      const adminStatus = await isAdmin();
+      console.log('Status admin:', adminStatus);
+      setIsAdminView(adminStatus);
+      
+      if (adminStatus) {
+        try {
+          // Utiliser la fonction RPC get_user_details pour obtenir les informations des utilisateurs
+          const { data: usersData, error: usersError } = await supabase
+            .rpc('get_user_details');
+
+          if (usersError) throw usersError;
+
+          console.log('Données utilisateurs:', usersData);
+
+          // Charger tous les projets
+          const { data: projectsData, error: projectsError } = await supabase
+            .from('projects')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (projectsError) throw projectsError;
+
+          console.log('Données projets:', projectsData);
+
+          // Charger les classes énergétiques et la progression pour tous les projets
+          const projectClasses: Record<string, EnergyClass> = {};
+          const projectProgresses: Record<string, number> = {};
+          const projectCategories: ProjectCategories = {};
+
+          for (const project of projectsData || []) {
+            // Charger la classe énergétique
+            const { data: classData } = await supabase
+              .from('global_results')
+              .select('final_class, last_updated')
+              .eq('project_id', project.id)
+              .order('last_updated', { ascending: false })
+              .limit(1);
+
+            projectClasses[project.id] = (classData?.[0]?.final_class as EnergyClass) || 'NA';
+
+            // Charger la progression
+            const { data: progressData } = await supabase
+              .from('global_results')
+              .select('project_progress, last_updated')
+              .eq('project_id', project.id)
+              .order('last_updated', { ascending: false })
+              .limit(1);
+
+            projectProgresses[project.id] = progressData?.[0]?.project_progress || 0;
+
+            // Charger les catégories activées
+            const { data: categoriesData } = await supabase
+              .from('global_results')
+              .select('category_id, is_enabled')
+              .eq('project_id', project.id)
+              .eq('is_enabled', true);
+
+            projectCategories[project.id] = categoriesData?.map(item => item.category_id) || [];
+          }
+
+          // Mettre à jour les états
+          setProjectClasses(projectClasses);
+          setProjectProgresses(projectProgresses);
+          setProjectCategories(projectCategories);
+
+          // Créer d'abord un objet avec tous les utilisateurs
+          const projectsByUser = (usersData as UserDetails[]).reduce((acc: { [key: string]: UserProjects }, user) => {
+            acc[user.user_id] = {
+              user_id: user.user_id,
+              email: user.email,
+              display_name: user.display_name,
+              projects: []
+            };
+            return acc;
+          }, {});
+
+          // Ensuite, ajouter les projets aux utilisateurs correspondants
+          projectsData?.forEach(project => {
+            if (projectsByUser[project.user_id]) {
+              projectsByUser[project.user_id].projects.push(project);
+            }
+          });
+
+          console.log('Projets groupés par utilisateur:', projectsByUser);
+
+          const userProjectsArray = Object.values(projectsByUser);
+          console.log('Tableau final des projets utilisateurs:', userProjectsArray);
+
+          setUserProjects(userProjectsArray);
+          setExpandedUsers([user?.id || '']);
+
+        } catch (error) {
+          console.error('Erreur lors du chargement des données:', error);
+        }
+      }
+    };
+
+    checkAdminAndLoadProjects();
+  }, [isAdmin, user]);
+
+  const handleUserAccordion = (userId: string) => {
+    setExpandedUsers(prev => 
+      prev.includes(userId)
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
   if (error) {
     return (
       <Container>
@@ -498,144 +641,323 @@ const ProjectList: React.FC = () => {
       )}
 
       {loading ? (
-        <LinearProgress />
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+          <CircularProgress />
+        </Box>
       ) : (
-        <Grid container spacing={3}>
-          {projects.map((project) => (
-            <Grid item xs={12} sm={6} md={4} key={project.id}>
-              <Paper
-                elevation={3}
-                sx={{
-                  p: { xs: 3, sm: 2.5 },
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: { xs: 2.5, sm: 2 },
-                  backgroundColor: getClassColor(projectClasses[project.id] || 'NA'),
-                  color: getClassTextColor(projectClasses[project.id] || 'NA'),
-                  borderRadius: { xs: '16px', sm: '12px' }
-                }}
-              >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <Box>
-                    <Typography 
-                      variant="h6" 
-                      sx={{ 
-                        fontSize: { xs: '1.25rem', sm: '1.15rem' },
-                        fontWeight: 600,
-                        mb: 0.5
+        <>
+          {isAdminView ? (
+            // Vue administrateur
+            <Box>
+              {userProjects.length === 0 ? (
+                <Alert severity="info">Aucun projet trouvé</Alert>
+              ) : (
+                userProjects.map((userProject) => (
+                  <Accordion
+                    key={userProject.user_id}
+                    expanded={expandedUsers.includes(userProject.user_id)}
+                    onChange={() => handleUserAccordion(userProject.user_id)}
+                    sx={{ mb: 2 }}
+                  >
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      sx={{
+                        backgroundColor: 'grey.100',
+                        '&:hover': { backgroundColor: 'grey.200' }
                       }}
                     >
-                      {project.name}
-                    </Typography>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        opacity: 0.9,
-                        fontSize: { xs: '0.95rem', sm: '0.875rem' }
-                      }}
-                    >
-                      {project.clientName}
-                    </Typography>
-                    {renderCategoryIcons(project.id)}
-                  </Box>
-                  <Chip
-                    label={projectClasses[project.id] || 'NA'}
-                    sx={{
-                      bgcolor: 'rgba(255, 255, 255, 0.2)',
-                      color: 'inherit',
-                      fontSize: { xs: '1.35rem', sm: '1.2rem' },
-                      fontWeight: 'bold',
-                      border: '2px solid',
-                      borderColor: 'rgba(255, 255, 255, 0.3)',
-                      height: { xs: '36px', sm: '32px' },
-                      ml: 1
-                    }}
-                  />
-                </Box>
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <PersonIcon color="action" />
+                        <Typography>
+                          {userProject.display_name || userProject.email}
+                          <Typography component="span" color="text.secondary" sx={{ ml: 1 }}>
+                            ({userProject.projects.length} projet{userProject.projects.length > 1 ? 's' : ''})
+                          </Typography>
+                        </Typography>
+                      </Box>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Grid container spacing={3}>
+                        {userProject.projects.map((project) => (
+                          <Grid item xs={12} sm={6} md={4} key={project.id}>
+                            <Paper
+                              elevation={3}
+                              sx={{
+                                p: { xs: 3, sm: 2.5 },
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: { xs: 2.5, sm: 2 },
+                                backgroundColor: getClassColor(projectClasses[project.id] || 'NA'),
+                                color: getClassTextColor(projectClasses[project.id] || 'NA'),
+                                borderRadius: { xs: '16px', sm: '12px' }
+                              }}
+                            >
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <Box>
+                                  <Typography 
+                                    variant="h6" 
+                                    sx={{ 
+                                      fontSize: { xs: '1.25rem', sm: '1.15rem' },
+                                      fontWeight: 600,
+                                      mb: 0.5
+                                    }}
+                                  >
+                                    {project.name}
+                                  </Typography>
+                                  <Typography 
+                                    variant="body2" 
+                                    sx={{ 
+                                      opacity: 0.9,
+                                      fontSize: { xs: '0.95rem', sm: '0.875rem' }
+                                    }}
+                                  >
+                                    {project.clientName}
+                                  </Typography>
+                                  {renderCategoryIcons(project.id)}
+                                </Box>
+                                <Chip
+                                  label={projectClasses[project.id] || 'NA'}
+                                  sx={{
+                                    bgcolor: 'rgba(255, 255, 255, 0.2)',
+                                    color: 'inherit',
+                                    fontSize: { xs: '1.35rem', sm: '1.2rem' },
+                                    fontWeight: 'bold',
+                                    border: '2px solid',
+                                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                                    height: { xs: '36px', sm: '32px' },
+                                    ml: 1
+                                  }}
+                                />
+                              </Box>
 
-                <Box sx={{ width: '100%' }}>
-                  <LinearProgress
-                    variant="determinate"
-                    value={projectProgresses[project.id] || 0}
-                    sx={{ 
-                      height: { xs: 10, sm: 8 }, 
-                      borderRadius: { xs: 5, sm: 4 },
-                      backgroundColor: 'rgba(0, 0, 0, 0.2)',
-                      '& .MuiLinearProgress-bar': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.3)'
-                      }
-                    }}
-                  />
-                  <Typography 
-                    variant="caption" 
-                    sx={{ 
-                      mt: 1,
-                      display: 'block', 
-                      opacity: 0.9,
-                      fontWeight: projectProgresses[project.id] === 100 ? 600 : 'inherit',
-                      fontSize: { xs: '0.9rem', sm: '0.75rem' }
-                    }}
-                  >
-                    Progression: {Math.round(projectProgresses[project.id] || 0)}%
-                  </Typography>
-                </Box>
+                              <Box sx={{ width: '100%' }}>
+                                <LinearProgress
+                                  variant="determinate"
+                                  value={projectProgresses[project.id] || 0}
+                                  sx={{ 
+                                    height: { xs: 10, sm: 8 }, 
+                                    borderRadius: { xs: 5, sm: 4 },
+                                    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                                    '& .MuiLinearProgress-bar': {
+                                      backgroundColor: 'rgba(0, 0, 0, 0.3)'
+                                    }
+                                  }}
+                                />
+                                <Typography 
+                                  variant="caption" 
+                                  sx={{ 
+                                    mt: 1,
+                                    display: 'block', 
+                                    opacity: 0.9,
+                                    fontWeight: projectProgresses[project.id] === 100 ? 600 : 'inherit',
+                                    fontSize: { xs: '0.9rem', sm: '0.75rem' }
+                                  }}
+                                >
+                                  Progression: {Math.round(projectProgresses[project.id] || 0)}%
+                                </Typography>
+                              </Box>
 
-                <Box sx={{ 
-                  display: 'flex', 
-                  gap: { xs: 2, sm: 1.5 }, 
-                  justifyContent: 'flex-end',
-                  mt: { xs: 1, sm: 0 }
-                }}>
-                  <Button
-                    variant="contained"
-                    onClick={() => navigate(`/projects/${project.id}/assessment`)}
+                              <Box sx={{ 
+                                display: 'flex', 
+                                gap: { xs: 2, sm: 1.5 }, 
+                                justifyContent: 'flex-end',
+                                mt: { xs: 1, sm: 0 }
+                              }}>
+                                <Button
+                                  variant="contained"
+                                  onClick={() => navigate(`/projects/${project.id}/assessment`)}
+                                  sx={{
+                                    bgcolor: 'rgba(255, 255, 255, 0.2)',
+                                    color: 'inherit',
+                                    '&:hover': {
+                                      bgcolor: 'rgba(255, 255, 255, 0.3)'
+                                    },
+                                    fontSize: { xs: '0.95rem', sm: '0.875rem' },
+                                    py: { xs: 1.2, sm: 1 }
+                                  }}
+                                >
+                                  Évaluer
+                                </Button>
+                                <Button
+                                  variant="contained"
+                                  onClick={() => navigate(`/projects/${project.id}`)}
+                                  sx={{
+                                    bgcolor: 'rgba(255, 255, 255, 0.2)',
+                                    color: 'inherit',
+                                    '&:hover': {
+                                      bgcolor: 'rgba(255, 255, 255, 0.3)'
+                                    },
+                                    fontSize: { xs: '0.95rem', sm: '0.875rem' },
+                                    py: { xs: 1.2, sm: 1 }
+                                  }}
+                                >
+                                  Détails
+                                </Button>
+                                <Button
+                                  variant="contained"
+                                  onClick={() => handleDeleteClick(project.id)}
+                                  sx={{
+                                    bgcolor: 'rgba(255, 255, 255, 0.2)',
+                                    color: 'inherit',
+                                    '&:hover': {
+                                      bgcolor: 'rgba(255, 255, 255, 0.3)'
+                                    },
+                                    fontSize: { xs: '0.95rem', sm: '0.875rem' },
+                                    py: { xs: 1.2, sm: 1 }
+                                  }}
+                                >
+                                  Supprimer
+                                </Button>
+                              </Box>
+                            </Paper>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </AccordionDetails>
+                  </Accordion>
+                ))
+              )}
+            </Box>
+          ) : (
+            // Vue utilisateur normale
+            <Grid container spacing={3}>
+              {projects.map((project) => (
+                <Grid item xs={12} sm={6} md={4} key={project.id}>
+                  <Paper
+                    elevation={3}
                     sx={{
-                      bgcolor: 'rgba(255, 255, 255, 0.2)',
-                      color: 'inherit',
-                      '&:hover': {
-                        bgcolor: 'rgba(255, 255, 255, 0.3)'
-                      },
-                      fontSize: { xs: '0.95rem', sm: '0.875rem' },
-                      py: { xs: 1.2, sm: 1 }
+                      p: { xs: 3, sm: 2.5 },
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: { xs: 2.5, sm: 2 },
+                      backgroundColor: getClassColor(projectClasses[project.id] || 'NA'),
+                      color: getClassTextColor(projectClasses[project.id] || 'NA'),
+                      borderRadius: { xs: '16px', sm: '12px' }
                     }}
                   >
-                    Évaluer
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={() => navigate(`/projects/${project.id}`)}
-                    sx={{
-                      bgcolor: 'rgba(255, 255, 255, 0.2)',
-                      color: 'inherit',
-                      '&:hover': {
-                        bgcolor: 'rgba(255, 255, 255, 0.3)'
-                      },
-                      fontSize: { xs: '0.95rem', sm: '0.875rem' },
-                      py: { xs: 1.2, sm: 1 }
-                    }}
-                  >
-                    Détails
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={() => handleDeleteClick(project.id)}
-                    sx={{
-                      bgcolor: 'rgba(255, 255, 255, 0.2)',
-                      color: 'inherit',
-                      '&:hover': {
-                        bgcolor: 'rgba(255, 255, 255, 0.3)'
-                      },
-                      fontSize: { xs: '0.95rem', sm: '0.875rem' },
-                      py: { xs: 1.2, sm: 1 }
-                    }}
-                  >
-                    Supprimer
-                  </Button>
-                </Box>
-              </Paper>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Box>
+                        <Typography 
+                          variant="h6" 
+                          sx={{ 
+                            fontSize: { xs: '1.25rem', sm: '1.15rem' },
+                            fontWeight: 600,
+                            mb: 0.5
+                          }}
+                        >
+                          {project.name}
+                        </Typography>
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            opacity: 0.9,
+                            fontSize: { xs: '0.95rem', sm: '0.875rem' }
+                          }}
+                        >
+                          {project.clientName}
+                        </Typography>
+                        {renderCategoryIcons(project.id)}
+                      </Box>
+                      <Chip
+                        label={projectClasses[project.id] || 'NA'}
+                        sx={{
+                          bgcolor: 'rgba(255, 255, 255, 0.2)',
+                          color: 'inherit',
+                          fontSize: { xs: '1.35rem', sm: '1.2rem' },
+                          fontWeight: 'bold',
+                          border: '2px solid',
+                          borderColor: 'rgba(255, 255, 255, 0.3)',
+                          height: { xs: '36px', sm: '32px' },
+                          ml: 1
+                        }}
+                      />
+                    </Box>
+
+                    <Box sx={{ width: '100%' }}>
+                      <LinearProgress
+                        variant="determinate"
+                        value={projectProgresses[project.id] || 0}
+                        sx={{ 
+                          height: { xs: 10, sm: 8 }, 
+                          borderRadius: { xs: 5, sm: 4 },
+                          backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                          '& .MuiLinearProgress-bar': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+                          }
+                        }}
+                      />
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          mt: 1,
+                          display: 'block', 
+                          opacity: 0.9,
+                          fontWeight: projectProgresses[project.id] === 100 ? 600 : 'inherit',
+                          fontSize: { xs: '0.9rem', sm: '0.75rem' }
+                        }}
+                      >
+                        Progression: {Math.round(projectProgresses[project.id] || 0)}%
+                      </Typography>
+                    </Box>
+
+                    <Box sx={{ 
+                      display: 'flex', 
+                      gap: { xs: 2, sm: 1.5 }, 
+                      justifyContent: 'flex-end',
+                      mt: { xs: 1, sm: 0 }
+                    }}>
+                      <Button
+                        variant="contained"
+                        onClick={() => navigate(`/projects/${project.id}/assessment`)}
+                        sx={{
+                          bgcolor: 'rgba(255, 255, 255, 0.2)',
+                          color: 'inherit',
+                          '&:hover': {
+                            bgcolor: 'rgba(255, 255, 255, 0.3)'
+                          },
+                          fontSize: { xs: '0.95rem', sm: '0.875rem' },
+                          py: { xs: 1.2, sm: 1 }
+                        }}
+                      >
+                        Évaluer
+                      </Button>
+                      <Button
+                        variant="contained"
+                        onClick={() => navigate(`/projects/${project.id}`)}
+                        sx={{
+                          bgcolor: 'rgba(255, 255, 255, 0.2)',
+                          color: 'inherit',
+                          '&:hover': {
+                            bgcolor: 'rgba(255, 255, 255, 0.3)'
+                          },
+                          fontSize: { xs: '0.95rem', sm: '0.875rem' },
+                          py: { xs: 1.2, sm: 1 }
+                        }}
+                      >
+                        Détails
+                      </Button>
+                      <Button
+                        variant="contained"
+                        onClick={() => handleDeleteClick(project.id)}
+                        sx={{
+                          bgcolor: 'rgba(255, 255, 255, 0.2)',
+                          color: 'inherit',
+                          '&:hover': {
+                            bgcolor: 'rgba(255, 255, 255, 0.3)'
+                          },
+                          fontSize: { xs: '0.95rem', sm: '0.875rem' },
+                          py: { xs: 1.2, sm: 1 }
+                        }}
+                      >
+                        Supprimer
+                      </Button>
+                    </Box>
+                  </Paper>
+                </Grid>
+              ))}
             </Grid>
-          ))}
-        </Grid>
+          )}
+        </>
       )}
 
       <Dialog

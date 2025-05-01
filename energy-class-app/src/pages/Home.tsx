@@ -39,13 +39,13 @@ const Home: React.FC = () => {
     <Container maxWidth="lg">
       <Box sx={{ my: 4 }}>
         {!isMobile && (
-          <Button
-            startIcon={<ArrowBackIcon />}
-            onClick={() => navigate(`/projects/${projectId}`)}
-            sx={{ mb: 2 }}
-          >
-            Retour au projet
-          </Button>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(`/projects/${projectId}`)}
+          sx={{ mb: 2 }}
+        >
+          Retour au projet
+        </Button>
         )}
 
         <FinalClassDisplay projectId={projectId || ''} />

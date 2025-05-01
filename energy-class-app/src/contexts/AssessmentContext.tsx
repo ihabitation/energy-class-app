@@ -3,17 +3,20 @@ import { BuildingAssessment } from '../types/energyClass';
 import { supabase } from '../lib/supabase';
 import { calculateFinalClass } from '../services/energyClassService';
 import { getCategories, getSubCategories } from '../services/energyClassService';
+import { useAuth } from './AuthContext';
 
 interface AssessmentContextType {
   getAssessment: (projectId: string) => BuildingAssessment;
   updateAssessment: (projectId: string, subCategoryId: string, classType: 'A' | 'B' | 'C' | 'D' | 'NA', selectedOption: string) => Promise<void>;
   updateGlobalResults: (projectId: string, enabledCategories: string[]) => Promise<void>;
+  loadProjectAssessment: (projectId: string) => Promise<void>;
 }
 
 const AssessmentContext = createContext<AssessmentContextType | undefined>(undefined);
 
 export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [assessments, setAssessments] = useState<Record<string, BuildingAssessment>>({});
+  const { isAdmin } = useAuth();
 
   const getAssessment = (projectId: string) => {
     return assessments[projectId] || {};
@@ -156,6 +159,67 @@ export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
+  const loadProjectAssessment = async (projectId: string) => {
+    try {
+      const { data: assessmentsData, error: assessmentsError } = await supabase
+        .from('assessments')
+        .select('*')
+        .eq('project_id', projectId);
+
+      if (assessmentsError) {
+        console.error('Erreur lors du chargement des évaluations:', assessmentsError);
+        return;
+      }
+
+      // Transformer les données de la base en format BuildingAssessment
+      const loadedAssessment: BuildingAssessment = {};
+      assessmentsData.forEach(assessment => {
+        const subCategoryId = `${assessment.category_id}.${assessment.sub_category_id}`;
+        loadedAssessment[subCategoryId] = {
+          classType: assessment.selected_class,
+          selectedOption: assessment.selected_option
+        };
+      });
+
+      setAssessments(prev => ({
+        ...prev,
+        [projectId]: loadedAssessment
+      }));
+
+      // Initialiser les global_results si nécessaire
+      const { data: existingResults, error: checkError } = await supabase
+        .from('global_results')
+        .select('category_id')
+        .eq('project_id', projectId);
+
+      if (checkError) {
+        console.error(`Erreur lors de la vérification des résultats pour le projet ${projectId}:`, checkError);
+        return;
+      }
+
+      // Si aucune entrée n'existe, créer les entrées par défaut
+      if (!existingResults || existingResults.length === 0) {
+        const allCategories = getCategories();
+        const defaultEntries = allCategories.map(category => ({
+          project_id: projectId,
+          category_id: category.id,
+          is_enabled: true,
+          last_updated: new Date().toISOString()
+        }));
+
+        const { error: insertError } = await supabase
+          .from('global_results')
+          .insert(defaultEntries);
+
+        if (insertError) {
+          console.error(`Erreur lors de l'initialisation des résultats pour le projet ${projectId}:`, insertError);
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement de l\'évaluation:', error);
+    }
+  };
+
   // Charger les évaluations au démarrage
   useEffect(() => {
     const loadAssessments = async () => {
@@ -227,7 +291,7 @@ export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, []);
 
   return (
-    <AssessmentContext.Provider value={{ getAssessment, updateAssessment, updateGlobalResults }}>
+    <AssessmentContext.Provider value={{ getAssessment, updateAssessment, updateGlobalResults, loadProjectAssessment }}>
       {children}
     </AssessmentContext.Provider>
   );

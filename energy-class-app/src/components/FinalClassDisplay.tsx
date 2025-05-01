@@ -6,14 +6,20 @@ import { useAssessment } from '../contexts/AssessmentContext';
 import { useCategories } from '../contexts/CategoryContext';
 import { useProjects } from '../contexts/ProjectContext';
 
-const FinalClassDisplay: React.FC<{ projectId: string }> = ({ projectId }) => {
+interface FinalClassDisplayProps {
+  projectId: string;
+  project?: any;  // Ajout de la prop project optionnelle
+}
+
+const FinalClassDisplay: React.FC<FinalClassDisplayProps> = ({ projectId, project: propProject }) => {
   const { getAssessment } = useAssessment();
   const { categories } = useCategories();
   const { projects } = useProjects();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
-  const project = projects.find(p => p.id === projectId);
+  // Utiliser le projet passé en prop s'il existe, sinon chercher dans le contexte
+  const project = propProject || projects.find(p => p.id === projectId);
   const enabledCategories = categories.filter(cat => cat.isEnabled).map(cat => cat.id);
   const assessment = getAssessment(projectId);
   const finalClass = calculateFinalClass(assessment, enabledCategories);
@@ -38,7 +44,7 @@ const FinalClassDisplay: React.FC<{ projectId: string }> = ({ projectId }) => {
         }}
       >
         <Box sx={{ 
-          display: 'flex',
+          display: 'flex', 
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 2

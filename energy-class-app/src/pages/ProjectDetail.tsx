@@ -12,10 +12,13 @@ import {
   Divider,
   useTheme,
   useMediaQuery,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ShareIcon from '@mui/icons-material/Share';
 import { useProjects } from '../contexts/ProjectContext';
 import { Project, ProjectStatus } from '../types/project';
 import { getClassColor, getClassTextColor } from '../utils/colors';
@@ -26,6 +29,8 @@ import { getSubCategories } from '../services/energyClassService';
 import TechnicalSolutionsList from '../components/TechnicalSolutionsList';
 import TechnicalSolutionForm from '../components/TechnicalSolutionForm';
 import SupabaseTest from '../components/SupabaseTest';
+import { ProjectShareDialog } from '../components/ProjectShareDialog';
+import { useAuth } from '../contexts/AuthContext';
 
 const statusLabels: Record<ProjectStatus, string> = {
   draft: 'Brouillon',
@@ -37,10 +42,12 @@ const ProjectDetail: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const { getProject } = useProjects();
+  const { user } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showTechnicalSolutions, setShowTechnicalSolutions] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const { categories } = useCategories();
   const { getAssessment } = useAssessment();
   const assessment = projectId ? getAssessment(projectId) : {};
@@ -103,6 +110,8 @@ const ProjectDetail: React.FC = () => {
     ? (completedSubCategories / totalSubCategories) * 100
     : 0;
 
+  const isOwner = user?.id === project?.user_id;
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {!isMobile && (
@@ -139,18 +148,31 @@ const ProjectDetail: React.FC = () => {
           gap: 2
         }}>
           <Box>
-            <Typography 
-              variant="h6" 
-              component="h1"
-              sx={{
-                fontSize: '2.5rem',
-                fontWeight: 700,
-                mb: 0.5,
-                lineHeight: 1
-              }}
-            >
-              {project.name}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography 
+                variant="h6" 
+                component="h1"
+                sx={{
+                  fontSize: '2.5rem',
+                  fontWeight: 700,
+                  mb: 0.5,
+                  lineHeight: 1
+                }}
+              >
+                {project.name}
+              </Typography>
+              {isOwner && (
+                <Tooltip title="Gérer les partages">
+                  <IconButton
+                    color="inherit"
+                    onClick={() => setShareDialogOpen(true)}
+                    size="small"
+                  >
+                    <ShareIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Box>
             <Typography 
               variant="body2"
               sx={{
@@ -518,6 +540,14 @@ const ProjectDetail: React.FC = () => {
           </Box>
         </Grid>
       </Grid>
+
+      {project && (
+        <ProjectShareDialog
+          open={shareDialogOpen}
+          onClose={() => setShareDialogOpen(false)}
+          projectId={project.id}
+        />
+      )}
     </Container>
   );
 };
