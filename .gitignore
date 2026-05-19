@@ -17,6 +17,10 @@
 .env.test.local
 .env.production.local
 
+# macOS / Synology artifacts
+Icon?
+.SynologyWorkingDirectory/
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
